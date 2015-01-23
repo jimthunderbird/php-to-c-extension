@@ -1,0 +1,22 @@
+{
+  "name": "jimthunderbird/php-to-c-extension",
+  "description": "A command line tool to convert php classes to c based php extensions",
+  "keywords": ["tool", "zephir", "extension", "builder"],
+  "homepage": "https://github.com/jimthunderbird/php-to-c-extension",
+  "license": "MIT",
+  "authors": [
+    {
+    "name": "Zike Huang",
+    "email": "jim.javathunderbird@gmail.com",
+    "homepage": "http://www.pamground.com",
+    "role": "Developer"
+  }
+  ],
+  "minimum-stability" : "dev",
+  "require": {
+    "php": ">=5.3.0"
+  },
+  "require-dev": {
+    "fezfez/php-to-zephir":"*"
+  }
+}
