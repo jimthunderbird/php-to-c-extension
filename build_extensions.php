@@ -1,5 +1,11 @@
 <?php 
 
+if ($argc == 1) {
+  $prompt = "Please specify the php file to convert to c extension\n";
+  $prompt .= "Usage: php ".basename(__FILE__)." [php file to convert to c extension]\n";
+  die($prompt);
+}
+
 require_once "FileAnalyser.php";
 
 $file = $argv[1];
