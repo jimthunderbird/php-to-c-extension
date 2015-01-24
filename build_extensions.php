@@ -34,7 +34,7 @@ foreach($extension_names as $extension_name) {
   $zephir_project_dir = $zephir_dir."/".$extension_name;
   if (chdir($zephir_project_dir) ) {
     echo shell_exec(__DIR__."/vendor/bin/php-to-zephir phpToZephir:convertDir .");
-    echo shell_exec("zephir build");
+    echo shell_exec(__DIR__."/vendor/bin/zephir build");
     //cleap up temporary directories
     shell_exec("rm -f $(find  $zephir_project_dir -type f -name \"*.php\")");
   }
