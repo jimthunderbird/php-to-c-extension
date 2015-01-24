@@ -36,6 +36,6 @@ foreach($extension_names as $extension_name) {
     echo shell_exec($cur_dir."/vendor/bin/php-to-zephir phpToZephir:convertDir .");
     echo shell_exec("zephir build");
     //cleap up temporary directories
-    shell_exec("rm -rf $zephir_project_dir/.temp");
+    shell_exec("rm -f $(find  $zephir_project_dir -type f -name \"*.php\")");
   }
 }
