@@ -6,6 +6,9 @@ if ($argc == 1) {
   die($prompt);
 }
 
+# try to install zephir first 
+shell_exec("yes | ".__DIR__."/vendor/bin/zephir install");
+
 require_once "FileAnalyser.php";
 
 $file = $argv[1];
