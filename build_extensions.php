@@ -7,7 +7,7 @@ if ($argc == 1) {
 }
 
 # try to install zephir first 
-shell_exec("yes | ".__DIR__."/vendor/bin/zephir install > /dev/null 2>/dev/null");
+shell_exec("yes 2>/dev/null | ".__DIR__."/vendor/bin/zephir install > /dev/null 2>/dev/null");
 
 require_once "FileAnalyser.php";
 
