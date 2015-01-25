@@ -16,6 +16,9 @@ $zephir_dir = $cur_dir."/build/zephir";
 
 shell_exec("mkdir -p $zephir_dir");
 
+//cleap up temporary php files
+shell_exec("rm -f $(find  $zephir_dir -type f -name \"*.php\")");
+
 $analyser = new FileAnalyser($file);
 
 $extension_names = [];
@@ -41,7 +44,5 @@ foreach($extension_names as $extension_name) {
   if (chdir($zephir_project_dir) ) {
     echo shell_exec(__DIR__."/vendor/bin/php-to-zephir phpToZephir:convertDir .");
     echo shell_exec(__DIR__."/vendor/bin/zephir build");
-    //cleap up temporary php files
-    shell_exec("rm -f $(find  $zephir_project_dir -type f -name \"*.php\")");
   }
 }
