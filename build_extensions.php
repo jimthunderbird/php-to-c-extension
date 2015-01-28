@@ -9,9 +9,10 @@ if ($argc == 1) {
 # try to install zephir first 
 shell_exec("yes 2>/dev/null | ".__DIR__."/vendor/bin/zephir install > /dev/null 2>/dev/null");
 
-require_once "FileAnalyser.php";
+require_once __DIR__.'/vendor/autoload.php';
 
 $file = $argv[1];
+$file = getcwd()."/".$file;
 
 $cur_dir = getcwd();
 
@@ -22,7 +23,12 @@ shell_exec("mkdir -p $zephir_dir");
 //cleap up temporary php files
 shell_exec("rm -f $(find  $zephir_dir -type f -name \"*.php\")");
 
-$analyser = new FileAnalyser($file);
+$target_file = $zephir_dir."/".basename($file);
+
+$file_filter = new PHPtoCExt\FileFilter($file, $target_file);
+$file_filter->filter();
+
+$analyser = new PHPtoCExt\FileAnalyser($target_file);
 
 $extension_names = [];
 foreach($analyser->get_user_defined_classes() as $class) {
@@ -33,7 +39,7 @@ foreach($analyser->get_user_defined_classes() as $class) {
     $zephir_source_dir = "$zephir_dir/$zephir_namespace/$zephir_namespace";
     if (is_readable($zephir_source_dir)) {
       $class_file_name = $analyser->get_class_name_without_namespace($class).".php";
-      $php_source_file = $zephir_source_dir."/".$class_file_name;
+      $php_source_file = $zephir_source_dir."/".$class_file_name; 
       file_put_contents($php_source_file, "<?php\n".$class_code);
       $extension_names[] = $zephir_namespace;
     }

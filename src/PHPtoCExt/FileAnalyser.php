@@ -1,5 +1,7 @@
 <?php  
 
+namespace PHPtoCExt;
+
 class FileAnalyser
 {
   private $file;
@@ -9,8 +11,8 @@ class FileAnalyser
   public function __construct($file)
   {
     $this->file = $file; 
-    $this->user_defined_classes = $this->get_user_defined_classes_in_file($file);
     $this->file_content = file_get_contents($file);
+    $this->user_defined_classes = $this->get_user_defined_classes_in_file($file);
   }
 
   public function get_root_namespace_of_class($class)
@@ -44,10 +46,10 @@ class FileAnalyser
     return $this->user_defined_classes;
   }
 
-  private function get_user_defined_classes_in_file($file) 
+  private function get_user_defined_classes_in_file() 
   {
     $previous_defined_classes = get_declared_classes();
-    require_once $file;
+    require_once $this->file;
     $current_defined_classes = get_declared_classes();
     $user_defined_classes = array_diff($current_defined_classes, $previous_defined_classes);
     $result = [];
@@ -57,4 +59,15 @@ class FileAnalyser
     return $result;
   }
 
+  private function filter_file_content($file_content)
+  {
+    $result = $this->convert_for_loop_to_while_loop($file_content);
+    return $result;
+  }
+
+  private function convert_for_loop_to_while_loop($file_content)
+  {
+    $convertor = new ForLoopToWhileLoopConvertor($file_content);
+    return $convertor->convert();
+  }
 }

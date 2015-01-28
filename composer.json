@@ -18,5 +18,10 @@
   },
   "require-dev": {
     "fezfez/php-to-zephir":"*"
+  },
+  "autoload": {
+    "psr-0": {
+      "PHPtoCExt": "src"
+    }
   }
 }
