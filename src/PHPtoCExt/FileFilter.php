@@ -22,17 +22,13 @@ class FileFilter
       "PHPtoCExt\PrintToEchoConverter"
     );
 
-    try {
-      $targetFileContent = $sourceFileContent;
-      //go through all converters to convert the source code
-      foreach ($converterClasses as $converterClass) {
-        $converter = new $converterClass($targetFileContent);
-        $targetFileContent = $converter->convert();
-      }
-      file_put_contents($this->targetFile, $targetFileContent);
+    $targetFileContent = $sourceFileContent;
+    //go through all converters to convert the source code
+    foreach ($converterClasses as $converterClass) {
+      $converter = new $converterClass($targetFileContent);
+      $targetFileContent = $converter->convert();
+    }
+    file_put_contents($this->targetFile, $targetFileContent);
 
-    } catch (ConverterException $e) {
-      echo $e->getMessage();
-    }  
   } 
 }

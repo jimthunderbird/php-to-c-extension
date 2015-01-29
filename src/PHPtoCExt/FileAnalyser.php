@@ -17,7 +17,12 @@ class FileAnalyser
 
   public function getRootNamespaceOfClass($class)
   {
-    return explode("\\", $class)[0];
+    //each extension must have a namespace!
+    $classComps = explode("\\", $class);
+    if (count($classComps) == 1) {
+      throw new PHPtoCExtException("class $class should have a namespace!");
+    }
+    return $classComps[0];
   }
 
   public function getCodeInClass($className)

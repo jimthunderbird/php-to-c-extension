@@ -62,7 +62,7 @@ class ForLoopToWhileLoopConverter extends Converter
         $this->code = str_replace($forLoopInfo->originalCode, $forLoopInfo->convertedWhileLoopCode, $this->code);
       }
     } catch (\PhpParser\Error $e) {
-      throw new ConverterException("PHP Parser Error: ".$e->getMessage());
+      throw new PHPtoCExtException("PHP Parser Error: ".$e->getMessage());
     }
 
     return $this->code;

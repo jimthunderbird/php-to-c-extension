@@ -26,33 +26,39 @@ shell_exec("rm -f $(find  $zephirDir -type f -name \"*.php\")");
 
 $targetFile = $zephirDir."/".basename($file);
 
-$fileFilter = new PHPtoCExt\FileFilter($file, $targetFile);
-$fileFilter->filter();
+try {
 
-$analyser = new PHPtoCExt\FileAnalyser($targetFile);
+  $fileFilter = new PHPtoCExt\FileFilter($file, $targetFile);
+  $fileFilter->filter();
 
-$extension_names = [];
-foreach($analyser->getUserDefinedClasses() as $class) {
-  $classCode = $analyser->getCodeInClass($class);
-  $zephirNamespace = strtolower($analyser->getRootNamespaceOfClass($class));
-  if (chdir($zephirDir)) {
-    shell_exec("zephir init $zephirNamespace");
-    $zephirSourceDir = "$zephirDir/$zephirNamespace/$zephirNamespace";
-    if (is_readable($zephirSourceDir)) {
-      $classFileName = $analyser->getClassNameWithoutNamespace($class).".php";
-      $phpSourceFile = $zephirSourceDir."/".$classFileName; 
-      file_put_contents($phpSourceFile, "<?php\n".$classCode);
-      $extensionNames[] = $zephirNamespace;
-    }
-  }  
-}
+  $analyser = new PHPtoCExt\FileAnalyser($targetFile);
 
-$extensionNames = array_unique($extensionNames);
-
-foreach($extensionNames as $extensionName) {
-  $zephirProjectDir = $zephirDir."/".$extensionName;
-  if (chdir($zephirProjectDir) ) {
-    echo shell_exec(__DIR__."/vendor/bin/php-to-zephir phpToZephir:convertDir .");
-    echo shell_exec(__DIR__."/vendor/bin/zephir build");
+  $extension_names = [];
+  foreach($analyser->getUserDefinedClasses() as $class) {
+    $classCode = $analyser->getCodeInClass($class);
+    $zephirNamespace = strtolower($analyser->getRootNamespaceOfClass($class));
+    if (chdir($zephirDir)) {
+      shell_exec("zephir init $zephirNamespace");
+      $zephirSourceDir = "$zephirDir/$zephirNamespace/$zephirNamespace";
+      if (is_readable($zephirSourceDir)) {
+        $classFileName = $analyser->getClassNameWithoutNamespace($class).".php";
+        $phpSourceFile = $zephirSourceDir."/".$classFileName; 
+        file_put_contents($phpSourceFile, "<?php\n".$classCode);
+        $extensionNames[] = $zephirNamespace;
+      }
+    }  
   }
+
+  $extensionNames = array_unique($extensionNames);
+
+  foreach($extensionNames as $extensionName) {
+    $zephirProjectDir = $zephirDir."/".$extensionName;
+    if (chdir($zephirProjectDir) ) {
+      echo shell_exec(__DIR__."/vendor/bin/php-to-zephir phpToZephir:convertDir .");
+      echo shell_exec(__DIR__."/vendor/bin/zephir build");
+    }
+  }
+
+} catch (PHPtoCExt\PHPtoCExtException $e) {
+  echo "Error: ".$e->getMessage()."\n";
 }
