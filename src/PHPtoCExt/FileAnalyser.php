@@ -22,7 +22,14 @@ class FileAnalyser
     if (count($classComps) == 1) {
       throw new PHPtoCExtException("class $class should have a namespace!");
     }
-    return $classComps[0];
+    
+    $namespace = $classComps[0];
+
+    if ( ctype_upper($namespace) || ctype_lower($namespace) ) {
+      throw new PHPtoCExtException("namespace must be in the CamelCase form!");
+    }
+
+    return $namespace;
   }
 
   public function getCodeInClass($className)
