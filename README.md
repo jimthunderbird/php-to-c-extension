@@ -26,7 +26,7 @@ class Hello
     }
 }
 ```
-### we then can execute:
+### we can then execute:
 ####
     php [path/to/php-to-c-extension]/build_extensions.php Dummy.php
 ### After a while we should get dummy.so installed, then if we add the following line to php.ini 
@@ -42,3 +42,31 @@ $o->say();
 ### and if we run it with php -c [path/to/php.ini]/php.ini test.php, we should get "hello" printed.
 ### You might have already noticed, the class Hello has the namespace Dummy and the extension name is dummy.so. 
 ### In fact, in order to build a php extension with this tool, all classes must have a CamelCase namespace, and the extension name is the lowercase form of the namespace. 
+
+
+###Example 2: a dummy extension with one namespace and multiple classes in one file 
+###Sometimes, for convenience, we might want to write a single file with one namespace an multiple classes, and we can do just that.
+###Let's create a file named Dummy.php an it looks like the following:
+```php 
+<?php 
+namespace Dummy; 
+class Hello 
+{
+  public function say()
+  {
+    echo "hello\n";
+  }
+}
+
+class Greeting 
+{
+  public function greet()
+  {
+    echo "hello\n";
+  }
+}
+``` 
+###We can then execute 
+####
+    php [path/to/php-to-c-extension]/build_extensions.php Dummy.php 
+### Once we get the dummy.so built and added to the php.ini, we will have both Dummy\Hello and Dummy\Greeting classes available for the user code.
