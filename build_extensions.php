@@ -13,45 +13,45 @@ require_once __DIR__.'/vendor/autoload.php';
 
 $file = $argv[1];
 
-$cur_dir = getcwd();
+$curDir = getcwd();
 
-$file = $cur_dir."/".$file;
+$file = $curDir."/".$file;
 
-$zephir_dir = $cur_dir."/build/zephir";
+$zephirDir = $curDir."/build/zephir";
 
-shell_exec("mkdir -p $zephir_dir");
+shell_exec("mkdir -p $zephirDir");
 
 //cleap up temporary php files
-shell_exec("rm -f $(find  $zephir_dir -type f -name \"*.php\")");
+shell_exec("rm -f $(find  $zephirDir -type f -name \"*.php\")");
 
-$target_file = $zephir_dir."/".basename($file);
+$targetFile = $zephirDir."/".basename($file);
 
-$file_filter = new PHPtoCExt\FileFilter($file, $target_file);
-$file_filter->filter();
+$fileFilter = new PHPtoCExt\FileFilter($file, $targetFile);
+$fileFilter->filter();
 
-$analyser = new PHPtoCExt\FileAnalyser($target_file);
+$analyser = new PHPtoCExt\FileAnalyser($targetFile);
 
 $extension_names = [];
-foreach($analyser->get_user_defined_classes() as $class) {
-  $class_code = $analyser->get_code_in_class($class);
-  $zephir_namespace = strtolower($analyser->get_root_namespace_of_class($class));
-  if (chdir($zephir_dir)) {
-    shell_exec("zephir init $zephir_namespace");
-    $zephir_source_dir = "$zephir_dir/$zephir_namespace/$zephir_namespace";
-    if (is_readable($zephir_source_dir)) {
-      $class_file_name = $analyser->get_class_name_without_namespace($class).".php";
-      $php_source_file = $zephir_source_dir."/".$class_file_name; 
-      file_put_contents($php_source_file, "<?php\n".$class_code);
-      $extension_names[] = $zephir_namespace;
+foreach($analyser->getUserDefinedClasses() as $class) {
+  $classCode = $analyser->getCodeInClass($class);
+  $zephirNamespace = strtolower($analyser->getRootNamespaceOfClass($class));
+  if (chdir($zephirDir)) {
+    shell_exec("zephir init $zephirNamespace");
+    $zephirSourceDir = "$zephirDir/$zephirNamespace/$zephirNamespace";
+    if (is_readable($zephirSourceDir)) {
+      $classFileName = $analyser->getClassNameWithoutNamespace($class).".php";
+      $phpSourceFile = $zephirSourceDir."/".$classFileName; 
+      file_put_contents($phpSourceFile, "<?php\n".$classCode);
+      $extensionNames[] = $zephirNamespace;
     }
   }  
 }
 
-$extension_names = array_unique($extension_names);
+$extensionNames = array_unique($extensionNames);
 
-foreach($extension_names as $extension_name) {
-  $zephir_project_dir = $zephir_dir."/".$extension_name;
-  if (chdir($zephir_project_dir) ) {
+foreach($extensionNames as $extensionName) {
+  $zephirProjectDir = $zephirDir."/".$extensionName;
+  if (chdir($zephirProjectDir) ) {
     echo shell_exec(__DIR__."/vendor/bin/php-to-zephir phpToZephir:convertDir .");
     echo shell_exec(__DIR__."/vendor/bin/zephir build");
   }

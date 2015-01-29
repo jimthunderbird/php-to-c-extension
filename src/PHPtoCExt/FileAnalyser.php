@@ -5,55 +5,50 @@ namespace PHPtoCExt;
 class FileAnalyser
 {
   private $file;
-  private $file_content;
-  private $user_defined_classes;
+  private $fileContent;
+  private $userDefinedClasses;
 
   public function __construct($file)
   {
     $this->file = $file; 
-    $this->file_content = file_get_contents($file);
-    $this->user_defined_classes = $this->get_user_defined_classes_in_file($file);
+    $this->fileContent = file_get_contents($file);
+    $this->userDefinedClasses = $this->getUserDefinedClassesInFile($file);
   }
 
-  public function get_root_namespace_of_class($class)
+  public function getRootNamespaceOfClass($class)
   {
     return explode("\\", $class)[0];
   }
 
-  public function get_first_class()
+  public function getCodeInClass($className)
   {
-    return $this->user_defined_classes[0];
+    $class = new \ReflectionClass($className);
+    $startLine = $class->getStartLine()-1; // getStartLine() seems to start after the {, we want to include the signature
+    $endLine = $class->getEndLine();
+    $numLines = $endLine - $startLine;
+    $namespace = $this->getRootNamespaceOfClass($className);
+    $classCode = "namespace $namespace;\n\n".implode("\n",array_slice(explode("\n",$this->fileContent),$startLine,$numLines))."\n";
+    return $classCode;
   }
 
-  public function get_code_in_class($class_name)
+  public function getClassNameWithoutNamespace($className)
   {
-    $class = new \ReflectionClass($class_name);
-    $start_line = $class->getStartLine()-1; // get_start_line() seems to start after the {, we want to include the signature
-    $end_line = $class->getEndLine();
-    $num_lines = $end_line - $start_line;
-    $namespace = $this->get_root_namespace_of_class($class_name);
-    $class_code = "namespace $namespace;\n\n".implode("\n",array_slice(explode("\n",$this->file_content),$start_line,$num_lines))."\n";
-    return $class_code;
+    return array_pop(explode("\\", $className));
   }
 
-  public function get_class_name_without_namespace($class_name)
+  public function getUserDefinedClasses()
   {
-    return array_pop(explode("\\", $class_name));
+    return $this->userDefinedClasses;
   }
 
-  public function get_user_defined_classes()
+  private function getUserDefinedClassesInFile() 
   {
-    return $this->user_defined_classes;
-  }
-
-  private function get_user_defined_classes_in_file() 
-  {
-    $previous_defined_classes = get_declared_classes();
+    $previousDefinedClasses = get_declared_classes();
     require_once $this->file;
-    $current_defined_classes = get_declared_classes();
-    $user_defined_classes = array_diff($current_defined_classes, $previous_defined_classes);
+    $currentDefinedClasses = get_declared_classes();
+    $userDefinedClasses = array_diff($currentDefinedClasses, $previousDefinedClasses);
     $result = [];
-    foreach($user_defined_classes as $class) {
+    foreach($userDefinedClasses as $class) {
       $result[] = $class;
     }
     return $result;
