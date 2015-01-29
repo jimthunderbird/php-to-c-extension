@@ -13,8 +13,7 @@ With PHP-TO-C Extension tool, the developer can choose a php file that is not ch
 ####
     php [path/to/php-to-c-extension]/build_extensions.php [php file to convert to c extension]
 
-##Example 1:
-###A simple hello world extension
+###Example 1: a simple hello world extension
 ###Let's create a file named HelloWorld.php, it looks like this:
 ```php
 <?php
