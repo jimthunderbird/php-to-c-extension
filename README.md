@@ -40,5 +40,5 @@ $o = new Dummy\Hello();
 $o->say();
 ```
 ### and if we run it with php -c [path/to/php.ini]/php.ini test.php, we should get "hello" printed.
-### You might have already notice, the class Hello has the namespace Dummy and the extension name is dummy.so. 
+### You might have already noticed, the class Hello has the namespace Dummy and the extension name is dummy.so. 
 ### In fact, in order to build a php extension with this tool, all classes must have a CamelCase namespace, and the extension name is the lowercase form of the namespace. 
