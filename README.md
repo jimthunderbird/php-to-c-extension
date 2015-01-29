@@ -45,7 +45,7 @@ $o->say();
 
 
 ###Example 2: a dummy extension with one namespace and multiple classes in one file 
-###Sometimes, for convenience, we might want to write a single file with one namespace an multiple classes, and we can do just that.
+###Sometimes, for convenience, we might want to write a single file with one namespace and multiple classes, and we can do just that.
 ###Let's create a file named Dummy.php an it looks like the following:
 ```php 
 <?php 
