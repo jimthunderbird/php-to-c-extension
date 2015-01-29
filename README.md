@@ -40,4 +40,4 @@ class HelloWorld
 $helloWorld = new HelloWorld\HelloWorld();
 $helloWorld->hello();
 ```
-### and if we run it with php [path/to/php.ini]/php.ini test.php, we should get "hello world" printed.
+### and if we run it with php -c [path/to/php.ini]/php.ini test.php, we should get "hello world" printed.
