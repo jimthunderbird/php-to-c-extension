@@ -58,16 +58,4 @@ class FileAnalyser
     }
     return $result;
   }
-
-  private function filter_file_content($file_content)
-  {
-    $result = $this->convert_for_loop_to_while_loop($file_content);
-    return $result;
-  }
-
-  private function convert_for_loop_to_while_loop($file_content)
-  {
-    $convertor = new ForLoopToWhileLoopConvertor($file_content);
-    return $convertor->convert();
-  }
 }

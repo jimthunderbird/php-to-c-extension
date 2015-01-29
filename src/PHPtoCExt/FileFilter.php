@@ -3,20 +3,36 @@ namespace PHPtoCExt;
 
 class FileFilter 
 {
-  private $source_file;
-  private $target_file;
+  private $sourceFile;
+  private $targetFile;
 
-  public function __construct($source_file, $target_file)
+  public function __construct($sourceFile, $targetFile)
   {
-    $this->source_file = $source_file;
-    $this->target_file = $target_file;
+    $this->sourceFile = $sourceFile;
+    $this->targetFile = $targetFile;
   }
 
   public function filter()
   {
-    $source_file_content = file_get_contents($this->source_file);  
-    $convertor = new ForLoopToWhileLoopConvertor($source_file_content);
-    $target_file_content = $convertor->convert();
-    file_put_contents($this->target_file, $target_file_content);
-  }
+    $sourceFileContent = file_get_contents($this->sourceFile);  
+
+    //load all converters 
+    $converterClasses = array(
+      "PHPtoCExt\ForLoopToWhileLoopConverter",
+      "PHPtoCExt\PrintToEchoConverter"
+    );
+
+    try {
+      $targetFileContent = $sourceFileContent;
+      //go through all converters to convert the source code
+      foreach ($converterClasses as $converterClass) {
+        $converter = new $converterClass($targetFileContent);
+        $targetFileContent = $converter->convert();
+      }
+      file_put_contents($this->targetFile, $targetFileContent);
+
+    } catch (ConverterException $e) {
+      echo $e->getMessage();
+    }  
+  } 
 }

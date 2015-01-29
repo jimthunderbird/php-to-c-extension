@@ -1,42 +1,33 @@
 <?php 
-
 namespace PHPtoCExt;
 
-class ForLoopToWhileLoopConvertor 
+class ForLoopToWhileLoopConverter extends Converter
 {
-  private $code;
-
-  public function __construct($code)
-  {
-    $this->code = $code;
-  }
-
   public function convert()
   {
-    $result = $this->code;
-    $codeLines = explode("\n",$this->code);
-
     $parser = new \PhpParser\Parser(new \PhpParser\Lexer);
-    $serializer = new \PhpParser\Serializer\XML;
+    $serializer = new \PhpParser\Serializer\XML();
 
     try {
       $stmts = $parser->parse($this->code);
-      $codeXml = $serializer->serialize($stmts);
-      //try to get all for loop information 
-      $codeXmlLines = explode("\n", $codeXml);
+
+      $codeLines = explode("\n", $this->code);
+      $codeASTXML = $serializer->serialize($stmts);
+      $codeASTXMLLines = explode("\n", $codeASTXML);
+
       $forLoopInfoIndexes = array();
       $index = 0;
-      foreach($codeXmlLines as $line) {
+      foreach($codeASTXMLLines as $line) {
         if (strpos(trim($line), "<node:Stmt_For>") === 0) {
           $forLoopInfoIndexes[] = $index;
         }
         $index ++;
       }
-
+      
       $forLoopInfos = array();
       foreach($forLoopInfoIndexes as $index) {
-        $startLineInfo = $codeXmlLines[$index + 2];
-        $endLineInfo = $codeXmlLines[$index + 5];
+        $startLineInfo = $codeASTXMLLines[$index + 2];
+        $endLineInfo = $codeASTXMLLines[$index + 5];
         $forLoopInfo = new \stdClass();
         $forLoopInfo->startLine = (int)str_replace(array("<scalar:int>","</scalar:int>"),"",$startLineInfo);
         $forLoopInfo->endLine = (int)str_replace(array("<scalar:int>","</scalar:int>"),"",$endLineInfo);
@@ -66,14 +57,14 @@ class ForLoopToWhileLoopConvertor
         $forLoopInfos[] = $forLoopInfo;
 
       }
-      
+
       foreach($forLoopInfos as $forLoopInfo) {
-        $result = str_replace($forLoopInfo->originalCode, $forLoopInfo->convertedWhileLoopCode, $result);
+        $this->code = str_replace($forLoopInfo->originalCode, $forLoopInfo->convertedWhileLoopCode, $this->code);
       }
-    } catch (PhpParser\Error $e) {
-      echo 'Parse Error: ', $e->getMessage();
+    } catch (\PhpParser\Error $e) {
+      throw new ConverterException("PHP Parser Error: ".$e->getMessage());
     }
 
-    return $result;
+    return $this->code;
   }
 }

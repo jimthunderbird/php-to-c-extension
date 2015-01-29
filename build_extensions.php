@@ -12,9 +12,10 @@ shell_exec("yes 2>/dev/null | ".__DIR__."/vendor/bin/zephir install > /dev/null 
 require_once __DIR__.'/vendor/autoload.php';
 
 $file = $argv[1];
-$file = getcwd()."/".$file;
 
 $cur_dir = getcwd();
+
+$file = $cur_dir."/".$file;
 
 $zephir_dir = $cur_dir."/build/zephir";
 
