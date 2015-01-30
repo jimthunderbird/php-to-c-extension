@@ -14,12 +14,14 @@ $input = $argv[1];
 
 $curDir = getcwd();
 
-$zephirDir = $curDir."/build/zephir";
+$buildDir = $curDir."/build";
+
+//remove the old build dir, if there is one 
+shell_exec("rm -rf $buildDir/");
+
+$zephirDir = $buildDir."/zephir";
 
 shell_exec("mkdir -p $zephirDir");
-
-//cleap up temporary php files
-shell_exec("rm -f $(find  $zephirDir -type f -name \"*.php\")");
 
 $extensionNames = [];
 
