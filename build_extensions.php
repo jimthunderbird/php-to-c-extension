@@ -26,13 +26,16 @@ $extensionNames = [];
 if (is_file($input)) {
   $file = $curDir."/".$file;
 } else if (is_dir($input)) {
-  $files = scandir($input);
   $fileContent = "<?php\n";
+  $files = scandir($input);
   foreach($files as $f) {
     if ($f !== "." && $f !== "..") {
-      $fc = str_replace("<?php","",file_get_contents($input."/".$f));
-      $fc = trim($fc);
-      $fileContent .= $fc."\n\n";
+      $fileInfo = new \SplFileInfo($f);
+      if ($fileInfo->getExtension() == "php") {
+        $fc = str_replace("<?php","",file_get_contents($input."/".$f));
+        $fc = trim($fc);
+        $fileContent .= $fc."\n\n";
+      } 
     }
   } 
   $file = $zephirDir."/".array_pop(explode("/",$input)).".php";
