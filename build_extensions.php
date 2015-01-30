@@ -1,5 +1,4 @@
 <?php 
-
 if ($argc == 1) {
   $prompt = "Please specify the php file to convert to c extension\n";
   $prompt .= "Usage: php ".basename(__FILE__)." [php file to convert to c extension]\n";
@@ -24,37 +23,43 @@ shell_exec("mkdir -p $zephirDir");
 //cleap up temporary php files
 shell_exec("rm -f $(find  $zephirDir -type f -name \"*.php\")");
 
-$targetFile = $zephirDir."/".basename($file);
-
 $extensionNames = [];
 
-try {
+$targetFile = $zephirDir."/".basename($file);
 
-  $fileFilter = new PHPtoCExt\FileFilter($file, $targetFile);
-  $fileFilter->filter();
+$buildExtension = !isset($buildExtension)? function($file, $targetFile) use (&$extensionNames, &$zephirDir) {
 
-  $analyser = new PHPtoCExt\FileAnalyser($targetFile);
+  try {
 
-  foreach($analyser->getUserDefinedClasses() as $class) {
-    $classCode = $analyser->getCodeInClass($class);
-    $zephirNamespace = strtolower($analyser->getRootNamespaceOfClass($class));
-    if (chdir($zephirDir)) {
-      shell_exec("zephir init $zephirNamespace");
-      $zephirSourceDir = "$zephirDir/$zephirNamespace/$zephirNamespace";
-      if (is_readable($zephirSourceDir)) {
-        $classFileName = $analyser->getClassNameWithoutNamespace($class).".php";
-        $phpSourceFile = $zephirSourceDir."/".$classFileName; 
-        file_put_contents($phpSourceFile, "<?php\n".$classCode);
-        $extensionNames[] = $zephirNamespace;
-      }
-    }  
+    $fileFilter = new PHPtoCExt\FileFilter($file, $targetFile);
+    $fileFilter->filter();
+
+    $analyser = new PHPtoCExt\FileAnalyser($targetFile);
+
+    foreach($analyser->getUserDefinedClasses() as $class) {
+      $classCode = $analyser->getCodeInClass($class);
+      $zephirNamespace = strtolower($analyser->getRootNamespaceOfClass($class));
+      if (chdir($zephirDir)) {
+        shell_exec("zephir init $zephirNamespace");
+        $zephirSourceDir = "$zephirDir/$zephirNamespace/$zephirNamespace";
+        if (is_readable($zephirSourceDir)) {
+          $classFileName = $analyser->getClassNameWithoutNamespace($class).".php";
+          $phpSourceFile = $zephirSourceDir."/".$classFileName; 
+          file_put_contents($phpSourceFile, "<?php\n".$classCode);
+          $extensionNames[] = $zephirNamespace;
+        }
+      }  
+    }
+
+    $extensionNames = array_unique($extensionNames);
+
+  } catch (PHPtoCExt\PHPtoCExtException $e) {
+    echo "Error: ".$e->getMessage()."\n";
   }
 
-  $extensionNames = array_unique($extensionNames);
+}:$buildExtension;
 
-} catch (PHPtoCExt\PHPtoCExtException $e) {
-  echo "Error: ".$e->getMessage()."\n";
-}
+$buildExtension($file, $targetFile);
 
 foreach($extensionNames as $extensionName) {
   $zephirProjectDir = $zephirDir."/".$extensionName;
