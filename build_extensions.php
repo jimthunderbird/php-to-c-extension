@@ -10,11 +10,9 @@ shell_exec("yes 2>/dev/null | ".__DIR__."/vendor/bin/zephir install > /dev/null 
 
 require_once __DIR__.'/vendor/autoload.php';
 
-$file = $argv[1];
+$input = $argv[1];
 
 $curDir = getcwd();
-
-$file = $curDir."/".$file;
 
 $zephirDir = $curDir."/build/zephir";
 
@@ -24,6 +22,22 @@ shell_exec("mkdir -p $zephirDir");
 shell_exec("rm -f $(find  $zephirDir -type f -name \"*.php\")");
 
 $extensionNames = [];
+
+if (is_file($input)) {
+  $file = $curDir."/".$file;
+} else if (is_dir($input)) {
+  $files = scandir($input);
+  $fileContent = "<?php\n";
+  foreach($files as $f) {
+    if ($f !== "." && $f !== "..") {
+      $fc = str_replace("<?php","",file_get_contents($input."/".$f));
+      $fc = trim($fc);
+      $fileContent .= $fc."\n\n";
+    }
+  } 
+  $file = $zephirDir."/".array_pop(explode("/",$input)).".php";
+  file_put_contents($file, $fileContent);
+}
 
 $targetFile = $zephirDir."/".basename($file);
 
