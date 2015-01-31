@@ -15,7 +15,11 @@ With PHP-TO-C-Ext tool, the developer can choose a php file that is not changed 
     or
     php [path/to/php-to-c-extension]/build_extensions.php [directory containing php files to convert to c extension]
 
-###Example 1: a simple dummy extension
+##Examples:
++[A simple dummy extension](#example-01)
++[One namespace and multiple classes](#example-02)
+
+###Example 01
 ###Let's create a file named Dummy.php, it looks like this:
 ```php
 <?php
@@ -46,7 +50,7 @@ $o->say();
 ### In fact, in order to build a php extension with this tool, all classes must have a CamelCase namespace, and the extension name is the lowercase form of the namespace. 
 
 
-###Example 2: a dummy extension with one namespace and multiple classes in one file 
+###Example 02 
 ###Sometimes, for convenience, we might want to write a single file with one namespace and multiple classes, and we can do just that.
 ###Let's create a file named Dummy.php an it looks like the following:
 ```php 
