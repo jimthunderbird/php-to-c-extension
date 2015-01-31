@@ -4,7 +4,7 @@ namespace PHPtoCExt;
 abstract class Converter 
 {
   protected $codeLines;
-  protected $codeXMLLines;
+  protected $codeASTXMLLines;
   protected $searches;
   protected $replaces;
 

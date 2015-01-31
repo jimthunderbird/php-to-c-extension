@@ -4,9 +4,9 @@ With PHP-TO-C-Ext tool, the developer can choose a php file that is not changed 
 
 PHP-TO-C-EXT is built on top of these great things:
 
-+ Zephir(http://zephir-lang.com/)
-+ PHP Parser(https://github.com/nikic/PHP-Parser)
-+ PHP to Zephir(https://github.com/fezfez/php-to-zephir)
++ Zephir (http://zephir-lang.com/)
++ PHP Parser (https://github.com/nikic/PHP-Parser)
++ PHP to Zephir (https://github.com/fezfez/php-to-zephir)
 
 ##Installation
 
