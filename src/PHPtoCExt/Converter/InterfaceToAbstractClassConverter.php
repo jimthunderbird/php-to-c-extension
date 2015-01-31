@@ -1,7 +1,7 @@
 <?php 
-namespace PHPtoCExt;
+namespace PHPtoCExt\Converter;
 
-class InterfaceToAbstractClassConverter extends Converter
+class InterfaceToAbstractClassConverter extends \PHPtoCExt\Converter
 {
   public function convert()
   {

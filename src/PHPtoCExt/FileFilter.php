@@ -27,11 +27,17 @@ class FileFilter
       $codeASTXMLLines = explode("\n", $codeASTXML);
 
       //load all converters 
-      $converterClasses = array(
-        "PHPtoCExt\ForLoopToWhileLoopConverter",
-        "PHPtoCExt\InterfaceToAbstractClassConverter",
-        "PHPtoCExt\PrintToEchoConverter"
-      );
+
+      $converterFiles = scandir(__DIR__."/Converter");
+      $converterClasses = array();
+      foreach($converterFiles as $f) {
+        if ($f !== "." && $f !== "..") {
+          $fileInfo = new \SplFileInfo($f);
+          if ($fileInfo->getExtension() == "php") {
+            $converterClasses[] = str_replace(".php","",__NAMESPACE__."\\Converter\\".$fileInfo->getBaseName());
+          } 
+        }
+      }
 
       $searches = array();
       $replaces = array();

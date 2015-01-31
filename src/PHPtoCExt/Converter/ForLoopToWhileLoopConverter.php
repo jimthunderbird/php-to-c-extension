@@ -1,7 +1,7 @@
 <?php 
-namespace PHPtoCExt;
+namespace PHPtoCExt\Converter;
 
-class ForLoopToWhileLoopConverter extends Converter
+class ForLoopToWhileLoopConverter extends \PHPtoCExt\Converter
 {
   public function convert()
   {
