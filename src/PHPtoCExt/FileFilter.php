@@ -14,22 +14,41 @@ class FileFilter
 
   public function filter()
   {
-    $sourceFileContent = file_get_contents($this->sourceFile);  
+    $sourceFileContent = trim(file_get_contents($this->sourceFile));  
 
-    //load all converters 
-    $converterClasses = array(
-      "PHPtoCExt\ForLoopToWhileLoopConverter",
-      "PHPtoCExt\InterfaceToAbstractClassConverter",
-      "PHPtoCExt\PrintToEchoConverter"
-    );
+    $parser = new \PhpParser\Parser(new \PhpParser\Lexer);
+    $serializer = new \PhpParser\Serializer\XML();
 
-    $targetFileContent = $sourceFileContent;
-    //go through all converters to convert the source code
-    foreach ($converterClasses as $converterClass) {
-      $converter = new $converterClass($targetFileContent);
-      $targetFileContent = $converter->convert();
+    try {
+      $stmts = $parser->parse($sourceFileContent);
+
+      $codeLines = explode("\n", $sourceFileContent);
+      $codeASTXML = $serializer->serialize($stmts);
+      $codeASTXMLLines = explode("\n", $codeASTXML);
+
+      //load all converters 
+      $converterClasses = array(
+        "PHPtoCExt\ForLoopToWhileLoopConverter",
+        "PHPtoCExt\InterfaceToAbstractClassConverter",
+        "PHPtoCExt\PrintToEchoConverter"
+      );
+
+      $searches = array();
+      $replaces = array();
+      //go through all converters to convert the source code 
+      foreach ($converterClasses as $converterClass) {
+        $converter = new $converterClass($codeLines, $codeASTXMLLines);
+        $converter->convert();
+        $searches = array_merge($searches, $converter->getSearches());
+        $replaces = array_merge($replaces, $converter->getReplaces());
+      }
+
+      $targetFileContent = str_replace($searches, $replaces, $sourceFileContent);
+      file_put_contents($this->targetFile, $targetFileContent);
+
+    } catch (\PhpParser\Error $e) {
+      throw new PHPtoCExtException("PHP Parser Error: ".$e->getMessage());
     }
-    file_put_contents($this->targetFile, $targetFileContent);
 
   } 
 }
