@@ -2,6 +2,11 @@ PHP-TO-C-Ext is a tool to allow developer to write codes in PHP and convert it d
 
 With PHP-TO-C-Ext tool, the developer can choose a php file that is not changed quite often and convert it to native php extension, thus speeding up the server response time and lower the resource consumption for each request.
 
+PHP-TO-C-EXT is built on top of these great things:
++ Zephir(http://zephir-lang.com/)
++ PHP Parser(https://github.com/nikic/PHP-Parser)
++ PHP to Zephir(https://github.com/fezfez/php-to-zephir)
+
 ##Installation
 ####
     1. Install composer
@@ -19,6 +24,7 @@ With PHP-TO-C-Ext tool, the developer can choose a php file that is not changed 
 + [A simple dummy extension](#example-01)
 + [One namespace and multiple classes in one file](#example-02)
 + [Organize multiple files in one directory](#example-03)
++ [Using for loop](#example-04)
 
 ###Example 01
 ####Let's create a file named Dummy.php, it looks like this:
@@ -79,7 +85,7 @@ class Greeting
 #### Once we get the dummy.so built and added to the php.ini, we will have both Dummy\Hello and Dummy\Greeting classes available for the user code.
 
 ###Example 03 
-####If we need to write more complicated php extensions, we usually need to maintain serveral source files, with PHPtoCExt tool, we can compile all files in a target directory.
+####If we need to write more complicated php extensions, we usually need to maintain serveral source files, with PHP-TO-C-EXT tool, we can compile all files in a target directory.
 ####Let's create a directory src/Dummy, and inside we will 2 files, Hello.php and Greeting.php 
 ####Here is what src/Hello.php looks like:
 ```php 
@@ -110,3 +116,33 @@ class Greeting
     php [path/to/php-to-c-extension]/build_extensions.php src/Dummy 
 ####We will then have dummy.so built, and now both Dummy\Hello and Dummy\Greeting classes available for the user code.
 ####Notice that both Hello.php and Dummy.php must have namespace Dummy defined in the beginning.
+
+###Example 04 
+####The for loop is a common language structure in php, here we will be creating a Dummy\SumCalculator class and built that into the dummy.so extension.
+####Let's create a file src/Dummy/SumCalculator.php, and it looks like this:
+```php 
+<?php 
+namespace Dummy;
+
+class SumCalculator 
+{
+  public function getSum($start, $end)
+  {
+    $sum = 0;
+    for ($i = $start; $i <= $end; $i++) {
+      $sum += $i;
+    }
+    return $sum;
+  }
+}
+``` 
+####Then if we execute 
+####
+    php [path/to/php-to-c-extension]/build_extensions.php src/Dummy 
+####We will then have dummy.so built, and now both Dummy\SumCalculator will be available for the user code.
+####We can do something like this in our user code:
+```php 
+<?php
+$calculator = new Dummy\SumCalculator();
+$calculator->getSum();
+```
