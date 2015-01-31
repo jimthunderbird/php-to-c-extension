@@ -19,6 +19,7 @@ class FileFilter
     //load all converters 
     $converterClasses = array(
       "PHPtoCExt\ForLoopToWhileLoopConverter",
+      "PHPtoCExt\InterfaceToAbstractClassConverter",
       "PHPtoCExt\PrintToEchoConverter"
     );
 
