@@ -16,8 +16,8 @@ With PHP-TO-C-Ext tool, the developer can choose a php file that is not changed 
     php [path/to/php-to-c-extension]/build_extensions.php [directory containing php files to convert to c extension]
 
 ##Examples:
-+[A simple dummy extension](#example-01)
-+[One namespace and multiple classes](#example-02)
++ [A simple dummy extension](#example-01)
++ [One namespace and multiple classes](#example-02)
 
 ###Example 01
 ###Let's create a file named Dummy.php, it looks like this:
