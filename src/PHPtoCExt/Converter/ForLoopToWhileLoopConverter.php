@@ -34,7 +34,7 @@ class ForLoopToWhileLoopConverter extends \PHPtoCExt\Converter
       $convertedWhileLoopCode = $forLoopInfo->initCode
         .";\n"
         .$forLoopIndentationCode
-        ."while({$forLoopInfo->conditionCode}){\n"
+        ."while({$forLoopInfo->conditionCode})\n"
         .$forLoopIndentationCode 
         .$forLoopIndentationCode
         .$forLoopInfo->bodyCode."\n"
