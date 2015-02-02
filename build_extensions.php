@@ -25,21 +25,21 @@ shell_exec("mkdir -p $zephirDir");
 
 $extensionNames = [];
 
+$file = "";
+
 if (is_file($input)) {
   $file = $curDir."/".$file;
 } else if (is_dir($input)) {
   $fileContent = "<?php\n";
-  $files = scandir($input);
+
+  $files = explode("\n",trim(shell_exec("find $input -type f -name \"*.php\"")));
+
   foreach($files as $f) {
-    if ($f !== "." && $f !== "..") {
-      $fileInfo = new \SplFileInfo($f);
-      if ($fileInfo->getExtension() == "php") {
-        $fc = str_replace("<?php","",file_get_contents($input."/".$f));
-        $fc = trim($fc);
-        $fileContent .= $fc."\n\n";
-      } 
-    }
-  } 
+    $fc = str_replace("<?php","",file_get_contents($f));
+    $fc = trim($fc);
+    $fileContent .= $fc."\n\n";
+  }
+
   $file = $zephirDir."/".array_pop(explode("/",$input)).".php";
   file_put_contents($file, $fileContent);
 }
@@ -60,13 +60,14 @@ $buildExtension = !isset($buildExtension)? function($file, $targetFile) use (&$e
       $zephirNamespace = strtolower($analyser->getRootNamespaceOfClass($class));
       if (chdir($zephirDir)) {
         shell_exec("zephir init $zephirNamespace");
-        $zephirSourceDir = "$zephirDir/$zephirNamespace/$zephirNamespace";
-        if (is_readable($zephirSourceDir)) {
-          $classFileName = $analyser->getClassNameWithoutNamespace($class).".php";
-          $phpSourceFile = $zephirSourceDir."/".$classFileName; 
-          file_put_contents($phpSourceFile, "<?php\n".$classCode);
-          $extensionNames[] = $zephirNamespace;
+        $classFileDir = strtolower(str_replace("\\","/",$analyser->getNamespaceOfClass($class)));
+        shell_exec("mkdir -p ".$zephirNamespace."/".$classFileDir);
+        if (!is_readable($zephirNamespace."/".$classFileDir)) {
+          throw new \PHPtoCExt\PHPtoCExtException("Fail to create directory ".$classFileDir);
         }
+        $classFileName = $zephirNamespace."/".$classFileDir."/".$analyser->getClassNameWithoutNamespace($class).".php";
+        file_put_contents($classFileName, "<?php\n".$classCode);
+        $extensionNames[] = $zephirNamespace;
       }  
     }
 

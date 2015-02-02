@@ -15,21 +15,33 @@ class FileAnalyser
     $this->userDefinedClasses = $this->getUserDefinedClassesInFile($file);
   }
 
-  public function getRootNamespaceOfClass($class)
+  public function getNamespaceOfClass($class)
   {
-    //each extension must have a namespace!
     $classComps = explode("\\", $class);
     if (count($classComps) == 1) {
       throw new PHPtoCExtException("class $class should have a namespace!");
     }
-    
-    $namespace = $classComps[0];
+    array_pop($classComps);
+    $namespace = "";
+    foreach($classComps as $index => $comp) {
+      if ( ctype_upper($comp) || ctype_lower($comp) ) {
+        throw new PHPtoCExtException("namespace must be in the CamelCase form!");
+      }
 
-    if ( ctype_upper($namespace) || ctype_lower($namespace) ) {
-      throw new PHPtoCExtException("namespace must be in the CamelCase form!");
+      if ($index == 0) {
+        $namespace .= $comp;
+      } else {
+        $namespace .= "\\".$comp;
+      }
     }
-
     return $namespace;
+  }
+
+  public function getRootNamespaceOfClass($class)
+  {
+    $namespace = $this->getNamespaceOfClass($class);
+    $rootNamespace = array_shift(explode("\\",$namespace));
+    return $rootNamespace;
   }
 
   public function getCodeInClass($className)
@@ -38,7 +50,7 @@ class FileAnalyser
     $startLine = $class->getStartLine()-1; // getStartLine() seems to start after the {, we want to include the signature
     $endLine = $class->getEndLine();
     $numLines = $endLine - $startLine;
-    $namespace = $this->getRootNamespaceOfClass($className);
+    $namespace = $this->getNamespaceOfClass($className);
     $classCode = "namespace $namespace;\n\n".implode("\n",array_slice(explode("\n",$this->fileContent),$startLine,$numLines))."\n";
     return $classCode;
   }
