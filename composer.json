@@ -17,7 +17,7 @@
     "php": ">=5.3.0"
   },
   "require-dev": {
-    "fezfez/php-to-zephir":"*"
+    "fezfez/php-to-zephir":"dev-master#5ea8dc05d759b64fa2590580d57c6016e55de833"
   },
   "autoload": {
     "psr-0": {
