@@ -33,6 +33,7 @@ $ php [path/to/php-to-c-extension]/build_extensions.php [directory containing ph
 + [One namespace and multiple classes in one file](#example-02)
 + [Organize multiple files in one directory](#example-03)
 + [Using for loop](#example-04)
++ [Using sub-namespaces] (#example-05)
 
 ###Example 01
 
@@ -162,4 +163,42 @@ class SumCalculator
 <?php
 $calculator = new Dummy\SumCalculator();
 $calculator->getSum();
+``` 
+
+###Example 05 
+####We can use sub namespaces in our code to better manage the cod in the extension.
+####When using sub namespaces, we need to make sure the first part of the sub namespace match is name of our extension.
+####In this example, let's create a dummy extension with the following directory and files.
+####1. src/Dummy/Vehicle.php 
+####2. src/Dummy/Vehicle/Car.php 
+####src/Dummy/Vehicle.php looks like this:
+```php 
+<?php 
+namespace Dummy;
+
+class Vehicle 
+{
+  public function say()
+  {
+    echo "I am a vehicle";
+  }
+}
 ```
+####src/Dummy/Vehicle/Car.php looks like this:
+```php
+<?php 
+namespace Dummy\Vehicle;
+
+class Car extends \Dummy\Vehicle
+{
+}
+``` 
+####Then if we execute 
+####
+    php [path/to/php-to-c-extension]/build_extensions.php src/Dummy 
+####We will then have dummy.so built, and then if we do the following in our user code 
+```php 
+$car = new Dummy\Vehicle\Car();
+$car->say();
+```
+####We will have "I am a vehicle" printed.
