@@ -63,7 +63,7 @@ $buildExtension = !isset($buildExtension)? function($file, $targetFile) use (&$e
         $classFileDir = strtolower(str_replace("\\","/",$analyser->getNamespaceOfClass($class)));
         shell_exec("mkdir -p ".$zephirNamespace."/".$classFileDir);
         if (!is_readable($zephirNamespace."/".$classFileDir)) {
-          throw new \PHPtoCExt\PHPtoCExtException("Fail to create directory ".$classFileDir);
+          throw new PHPtoCExt\PHPtoCExtException("Fail to create directory ".$classFileDir);
         }
         $classFileName = $zephirNamespace."/".$classFileDir."/".$analyser->getClassNameWithoutNamespace($class).".php";
         file_put_contents($classFileName, "<?php\n".$classCode);
