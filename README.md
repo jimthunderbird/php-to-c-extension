@@ -43,10 +43,10 @@ Let's create a file named Dummy.php, it looks like this:
 namespace Dummy;
 class Hello 
 {
-    public function say()
-    {
-        echo "hello";
-    }
+  public function say()
+  {
+    echo "hello";
+  }
 }
 ```
 
@@ -131,11 +131,11 @@ class Greeting
 ####Then if we execute 
 ####
     php [path/to/php-to-c-extension]/build_extensions.php src/Dummy 
-####We will then have dummy.so built, and now both Dummy\Hello and Dummy\Greeting classes available for the user code.
+####We will then have dummy.so built, and now both Dummy\Hello and Dummy\Greeting classes will be available for the user code.
 ####Notice that both Hello.php and Dummy.php must have namespace Dummy defined in the beginning.
 
 ###Example 04 
-####The for loop is a common language structure in php, here we will be creating a Dummy\SumCalculator class and built that into the dummy.so extension.
+####For loop is a common control structure in php, here we will be creating a Dummy\SumCalculator class and built that into the dummy.so extension.
 ####Let's create a file src/Dummy/SumCalculator.php, and it looks like this:
 ```php 
 <?php 
