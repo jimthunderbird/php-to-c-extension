@@ -166,7 +166,7 @@ $calculator->getSum();
 ``` 
 
 ###Example 05 
-####We can use sub namespaces in our code to better manage the cod in the extension.
+####We can use sub namespaces to better manage the cod in the extension.
 ####When using sub namespaces, we need to make sure the first part of the sub namespace match is name of our extension.
 ####In this example, let's create a dummy extension with the following directory and files.
 ####1. src/Dummy/Vehicle.php 
