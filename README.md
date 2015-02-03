@@ -276,7 +276,7 @@ class Vehicle
 ```
 #### Then if we execute
 ####
-    php [path/to/php-to-c-extension]/build_extensions.php src/Dummy 
+    php [path/to/php-to-c-extension]/build_extensions.php src/dummy.php
 ####Once the extension dummy.so is built, we will have method move() and play() available for class Vehicle.
 ####And if we do the following in our user code 
 ```php 
