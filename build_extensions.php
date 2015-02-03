@@ -26,9 +26,11 @@ shell_exec("mkdir -p $zephirDir");
 $extensionNames = [];
 
 $file = "";
+$fileContent = "";
 
 if (is_file($input)) {
-  $file = $curDir."/".$file;
+  $file = $curDir."/".$input;
+  $fileContent = file_get_contents($file);
 } else if (is_dir($input)) {
   $fileContent = "<?php\n";
 
@@ -41,8 +43,9 @@ if (is_file($input)) {
   }
 
   $file = $zephirDir."/".array_pop(explode("/",$input)).".php";
-  file_put_contents($file, $fileContent);
 }
+
+file_put_contents($file, $fileContent);
 
 $targetFile = $zephirDir."/".basename($file);
 
