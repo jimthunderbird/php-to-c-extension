@@ -244,7 +244,7 @@ $car->move();
 ####We will have "I am moving" printed.
 
 ###Example 07 
-####Trait is a new feature introduced in php 5.4 to allow grouping of functionalities and resued by individual classes.
+####Trait is a new feature introduced in php 5.4 to allow grouping of functionalities and reUsed by individual classes.
 ####In the example below, we are going to demonstrate using trait to build a dummy php extension 
 ####We are going to create a file src/dummy.php, and it looks like this:
 ```php 
