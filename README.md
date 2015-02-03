@@ -36,6 +36,7 @@ $ php [path/to/php-to-c-extension]/build_extensions.php [directory containing ph
 + [Using sub-namespaces] (#example-05)
 + [Using interface] (#example-06)
 + [Using trait] (#example-07)
++ [Calling method in the base class with parent::](#example-08)
 
 ###Example 01
 
@@ -285,4 +286,53 @@ $vehicle = new Dummy\Vehicle();
 $vehicle->play();
 $vehicle->move();
 ```
-####We will see the "I am playing.I am moving." printed
+####We will see the "I am playing.I am moving." printed 
+
+###Example 08 
+####When we need to call certain methods in the base class, we will need to use the parent keyword, below is an example:
+####Let's create a file named dummy.php and it looks like this:
+```php 
+<?php 
+namespace Dummy;
+
+trait StoppableTrait 
+{
+  public function stop()
+  {
+    echo "I am stopping now.";
+  }
+}
+
+class Vehicle 
+{
+  use StoppableTrait;
+
+  public function __construct()
+  {
+    echo "I am a new vehicle.";
+  }
+}
+
+class Car extends Vehicle 
+{
+  public function __construct() 
+  {
+    parent::__construct();
+    echo "I am also a new car.";
+  }
+
+  public function stop()
+  {
+    parent::stop();
+    echo "don't worry i am a car.";
+  }
+}
+```
+####In the code above, we know that the base class Vehicle has a method named stop() defined by the trait.
+####And now if we do 
+```php 
+$car = new Dummy\Car();
+$car->stop();
+```
+####We should see the following printed 
+####"I am a new vehicle.I am also a new car.I am stopping now.don't worry i am a car."
