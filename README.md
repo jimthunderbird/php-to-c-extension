@@ -212,6 +212,7 @@ $car->say();
 ####src/Dummy/MovableInterface.php looks like this:
 ```php 
 <?php 
+namespace Dummy;
 interface MovableInterface
 {
   public function move();
