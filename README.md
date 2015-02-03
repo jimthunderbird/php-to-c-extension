@@ -35,6 +35,7 @@ $ php [path/to/php-to-c-extension]/build_extensions.php [directory containing ph
 + [Using for loop](#example-04)
 + [Using sub-namespaces] (#example-05)
 + [Using interface] (#example-06)
++ [Using trait] (#example-07)
 
 ###Example 01
 
@@ -240,3 +241,48 @@ $car = new Dummy\Vehicle();
 $car->move();
 ```
 ####We will have "I am moving" printed.
+
+###Example 07 
+####Trait is a new feature introduced in php 5.4 to allow grouping of functionalities and resued by individual classes.
+####In the example below, we are going to demonstrate using trait to build a dummy php extension 
+####We are going to create a file src/dummy.php, and it looks like this:
+```php 
+<?php 
+namespace Dummy\Traits;
+
+trait MovableTrait 
+{
+  public function move()
+  {
+    echo "I am moving.";
+  }
+}
+
+trait PlayableTrait 
+{
+  public function play()
+  {
+    echo "I am playing.";
+  }
+}
+
+namespace Dummy;
+
+class Vehicle 
+{
+  use \Dummy\Traits\MovableTrait;
+  use \Dummy\Traits\PlayableTrait;
+}
+```
+#### Then if we execute
+####
+    php [path/to/php-to-c-extension]/build_extensions.php src/Dummy 
+####Once the extension dummy.so is built, we will have method move() and play() available for class Vehicle.
+####And if we do the following in our user code 
+```php 
+<?php 
+$vehicle = new Dummy\Vehicle();
+$vehicle->play();
+$vehicle->move();
+```
+####We will see the "I am playing.I am moving." printed
