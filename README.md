@@ -388,7 +388,7 @@ class Car extends Vehicle
   }
 }
 ```
-####Notice the getInstance() method in class Vehicle, we use the self keyword to create a singlton.
+####Notice the getInstance() method in class Vehicle, we use the self keyword to create a singleton.
 ####And now once we have dummy.so built, if we do the following in the user code:
 ```php 
 <?php 
