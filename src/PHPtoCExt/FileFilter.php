@@ -6,10 +6,15 @@ class FileFilter
   private $sourceFile;
   private $targetFile;
 
+  private $postSearches;
+  private $postReplaces;
+
   public function __construct($sourceFile, $targetFile)
   {
     $this->sourceFile = $sourceFile;
     $this->targetFile = $targetFile;
+    $this->postSearches = array();
+    $this->postReplaces = array();
   }
 
   public function filter()
@@ -45,13 +50,20 @@ class FileFilter
 
       $searches = array();
       $replaces = array();
+      $postSearches = array();
+      $postReplaces = array();
       //go through all converters to convert the source code 
       foreach ($converterClasses as $converterClass) {
         $converter = new $converterClass($codeLines, $codeASTXMLLines);
         $converter->convert();
         $searches = array_merge($searches, $converter->getSearches());
         $replaces = array_merge($replaces, $converter->getReplaces());
+        $postSearches = array_merge($postSearches, $converter->getPostSearches());
+        $postReplaces = array_merge($postReplaces, $converter->getPostReplaces());
       }
+
+      $this->postSearches = $postSearches;
+      $this->postReplaces = $postReplaces;
 
       $targetFileContent = str_replace($searches, $replaces, $sourceFileContent);
       file_put_contents($this->targetFile, $targetFileContent);
@@ -61,6 +73,16 @@ class FileFilter
     }
 
   } 
+
+  public function getPostSearches()
+  {
+    return $this->postSearches;
+  } 
+
+  public function getPostReplaces()
+  {
+    return $this->postReplaces;
+  }
 
   /**
    * remove all comments in php code 
