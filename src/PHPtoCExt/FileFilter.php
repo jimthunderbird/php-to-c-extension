@@ -59,11 +59,12 @@ class FileFilter
         $searches = $converter->getSearches();
         $replaces = $converter->getReplaces();
         $sourceFileContent = str_replace($searches, $replaces, $sourceFileContent);
-        file_put_contents($this->targetFile, $sourceFileContent);
 
         $postSearches = array_merge($postSearches, $converter->getPostSearches());
         $postReplaces = array_merge($postReplaces, $converter->getPostReplaces());
       }
+
+      file_put_contents($this->targetFile, $sourceFileContent);
 
       $this->postSearches = $postSearches;
       $this->postReplaces = $postReplaces;
