@@ -37,7 +37,7 @@ $ php [path/to/php-to-c-extension]/build_extensions.php [directory containing ph
 + [Using interface] (#example-06)
 + [Using trait] (#example-07)
 + [Calling method in the base class with parent::](#example-08)
-+ [Using the self keyword on static method](#example-09)
++ [Using the self keyword](#example-09)
 
 ###Example 01
 
