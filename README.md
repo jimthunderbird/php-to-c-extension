@@ -38,6 +38,7 @@ $ php [path/to/php-to-c-extension]/build_extensions.php [directory containing ph
 + [Using trait] (#example-07)
 + [Calling method in the base class with parent::](#example-08)
 + [Using the self keyword](#example-09)
++ [Using ternary operator](#example-10)
 
 ###Example 01
 
@@ -404,3 +405,37 @@ print $car1->stop()."\n";
 ####We should see the following printed 
 ####"I am a new vehicle.Two cars are identical
 ####I am stopping now."
+
+###Example 10 
+####We can use ternary operator as a shortcut to write coniditional statemements and variable assignmens 
+####Let's create a file named dummy.php and it looks like this:
+```php 
+<?php
+namespace Dummy;
+
+class Number 
+{
+  private $number;
+
+  public function __construct($number)
+  {
+    $this->number = $number;
+  }
+
+  public function isPositive()
+  {
+    $result = ($this->number > 0)?true:false;
+    return $result;
+  }
+}
+``` 
+####Then once we dummy.so built, in the user code if we do the following:
+```php 
+<?php 
+$number = new Dummy\Number(10);
+if ($number->isPositive() === TRUE) {
+  echo "This is a positive number.";
+}
+```
+####We then should see the following printed on the screen.
+####"This is a positive number."
