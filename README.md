@@ -407,7 +407,7 @@ print $car1->stop()."\n";
 ####I am stopping now."
 
 ###Example 10 
-####We can use ternary operator as a shortcut to write coniditional statemements and variable assignmens 
+####We can use ternary operator as a shortcut to write conditional statemements and variable assignmens 
 ####Let's create a file named dummy.php and it looks like this:
 ```php 
 <?php
