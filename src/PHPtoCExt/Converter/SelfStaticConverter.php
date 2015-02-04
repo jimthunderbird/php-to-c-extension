@@ -12,11 +12,6 @@ class SelfStaticConverter extends \PHPtoCExt\Converter
       }
     }
 
-    //add post convertion searches and replaces 
-    //tricky, this must come first
-    $this->postSearchAndReplace("var self__static__instance;","");
-    $this->postSearchAndReplace("let self__static__instance =  null;","");
-
 
     foreach($classMethodInfoIndexes as $index) {
       $selfStaticVarNamesMap = array();
@@ -38,6 +33,9 @@ class SelfStaticConverter extends \PHPtoCExt\Converter
           $selfStaticVarNameInitStmt = "\n"."$"."self__static__".$varName."=null;\n";  
           $this->codeLines[$startLine] .= $selfStaticVarNameInitStmt;
           //add post convertion searches and replaces 
+          //tricky, these must come in order
+          $this->postSearchAndReplace("var self__static__$varName;","");
+          $this->postSearchAndReplace("let self__static__$varName =  null;","");
           $this->postSearchAndReplace("self__static__".$varName,"self::".$varName);
         } 
         $convertedClassMethodCode = trim(implode("\n", array_slice($this->codeLines, $startLine-1, $endLine - $startLine + 1)));
@@ -45,7 +43,7 @@ class SelfStaticConverter extends \PHPtoCExt\Converter
         $this->searchAndReplace($originalClassMethodCode, $convertedClassMethodCode);
       }
     }
-    
+
   }
 }
 
