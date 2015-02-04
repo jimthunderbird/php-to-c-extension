@@ -166,7 +166,7 @@ class SumCalculator
 ```php 
 <?php
 $calculator = new Dummy\SumCalculator();
-$calculator->getSum();
+$calculator->getSum(1,10);
 ``` 
 
 ###Example 05 
