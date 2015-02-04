@@ -37,6 +37,7 @@ $ php [path/to/php-to-c-extension]/build_extensions.php [directory containing ph
 + [Using interface] (#example-06)
 + [Using trait] (#example-07)
 + [Calling method in the base class with parent::](#example-08)
++ [Using the self keyword on static method](#example-09)
 
 ###Example 01
 
@@ -336,3 +337,70 @@ $car->stop();
 ```
 ####We should see the following printed 
 ####"I am a new vehicle.I am also a new car.I am stopping now.don't worry i am a car."
+
+###Example 09
+####We can use the self keyword just like normal php to build a php extension, below is an example:
+####Let's create a file named dummy.php and it looks like this:
+```php 
+<?php 
+namespace Dummy;
+
+trait StoppableTrait 
+{
+  public function stop()
+  {
+    echo "I am stopping now.";
+  }
+}
+
+class Vehicle 
+{
+  private static $singleton;
+
+  use StoppableTrait;
+
+  public function __construct()
+  {
+    echo "I am a new vehicle.";
+  }
+
+  public static function getInstance()
+  {
+    if (!isset(self::$singleton)) {
+      self::$singleton = new self();
+    }  
+    return self::$singleton;
+  }
+}
+
+class Car extends Vehicle 
+{
+  public function __construct() 
+  {
+    parent::__construct();
+    echo "I am also a new car.";
+  }
+
+  public function stop()
+  {
+    parent::stop();
+    echo "don't worry i am a car.";
+  }
+}
+```
+####Notice the getInstance() method in class Vehicle, we use the self keyword to create a singlton.
+####And now once we have dummy.so built, if we do the following in the user code:
+```php 
+<?php 
+$car1 = Dummy\Car::getInstance();
+$car2 = Dummy\Car::getInstance();
+
+if ($car1 === $car2) {
+  print "Two cars are identical\n";
+} 
+
+print $car1->stop()."\n";
+```
+####We should see the following printed 
+####"I am a new vehicle.Two cars are identical
+####I am stopping now."
