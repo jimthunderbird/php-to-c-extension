@@ -12,7 +12,6 @@ class SelfStaticConverter extends \PHPtoCExt\Converter
       }
     }
 
-
     foreach($classMethodInfoIndexes as $index) {
       $selfStaticVarNamesMap = array();
       $startLine = (int)str_replace(array("<scalar:int>","</scalar:int>"),"",$this->codeASTXMLLines[$index + 2]);
@@ -46,4 +45,3 @@ class SelfStaticConverter extends \PHPtoCExt\Converter
 
   }
 }
-

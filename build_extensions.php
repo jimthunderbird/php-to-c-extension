@@ -88,13 +88,10 @@ foreach($extensionNames as $extensionName) {
     //now do post convertion searches and replaces
     echo "Performing post conversion processing...\n";
 
-    $searches = $fileFilter->getPostSearches();
-    $replaces = $fileFilter->getPostReplaces();
-
     $convertedFiles = explode("\n",trim(shell_exec("find . -type f -name \"*.zep\"")));
 
     foreach($convertedFiles as $file) {
-      file_put_contents($file, str_replace($searches, $replaces, file_get_contents($file)));
+      $fileFilter->postFilter($file);
     }
 
     echo "Finished post conversion processing\n";
