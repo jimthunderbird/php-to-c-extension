@@ -49,45 +49,56 @@ file_put_contents($file, $fileContent);
 
 $targetFile = $zephirDir."/".basename($file);
 
-$buildExtension = !isset($buildExtension)? function($file, $targetFile) use (&$extensionNames, &$zephirDir) {
+$fileFilter = null;
 
-  try {
+try {
 
-    $fileFilter = new PHPtoCExt\FileFilter($file, $targetFile);
-    $fileFilter->filter();
+  $fileFilter = new PHPtoCExt\FileFilter($file, $targetFile);
+  $fileFilter->filter();
 
-    $analyser = new PHPtoCExt\FileAnalyser($targetFile);
+  $analyser = new PHPtoCExt\FileAnalyser($targetFile);
 
-    foreach($analyser->getUserDefinedClasses() as $class) {
-      $classCode = $analyser->getCodeInClass($class);
-      $zephirNamespace = strtolower($analyser->getRootNamespaceOfClass($class));
-      if (chdir($zephirDir)) {
-        shell_exec("zephir init $zephirNamespace");
-        $classFileDir = strtolower(str_replace("\\","/",$analyser->getNamespaceOfClass($class)));
-        shell_exec("mkdir -p ".$zephirNamespace."/".$classFileDir);
-        if (!is_readable($zephirNamespace."/".$classFileDir)) {
-          throw new PHPtoCExt\PHPtoCExtException("Fail to create directory ".$classFileDir);
-        }
-        $classFileName = $zephirNamespace."/".$classFileDir."/".$analyser->getClassNameWithoutNamespace($class).".php";
-        file_put_contents($classFileName, "<?php\n".$classCode);
-        $extensionNames[] = $zephirNamespace;
-      }  
-    }
-
-    $extensionNames = array_unique($extensionNames);
-
-  } catch (PHPtoCExt\PHPtoCExtException $e) {
-    echo "Error: ".$e->getMessage()."\n";
+  foreach($analyser->getUserDefinedClasses() as $class) {
+    $classCode = $analyser->getCodeInClass($class);
+    $zephirNamespace = strtolower($analyser->getRootNamespaceOfClass($class));
+    if (chdir($zephirDir)) {
+      shell_exec("zephir init $zephirNamespace");
+      $classFileDir = strtolower(str_replace("\\","/",$analyser->getNamespaceOfClass($class)));
+      shell_exec("mkdir -p ".$zephirNamespace."/".$classFileDir);
+      if (!is_readable($zephirNamespace."/".$classFileDir)) {
+        throw new PHPtoCExt\PHPtoCExtException("Fail to create directory ".$classFileDir);
+      }
+      $classFileName = $zephirNamespace."/".$classFileDir."/".$analyser->getClassNameWithoutNamespace($class).".php";
+      file_put_contents($classFileName, "<?php\n".$classCode);
+      $extensionNames[] = $zephirNamespace;
+    }  
   }
 
-}:$buildExtension;
+  $extensionNames = array_unique($extensionNames);
 
-$buildExtension($file, $targetFile);
+} catch (PHPtoCExt\PHPtoCExtException $e) {
+  die("Error: ".$e->getMessage()."\n");
+}
 
 foreach($extensionNames as $extensionName) {
   $zephirProjectDir = $zephirDir."/".$extensionName;
   if (chdir($zephirProjectDir) ) {
     echo shell_exec(__DIR__."/vendor/bin/php-to-zephir phpToZephir:convertDir .");
+
+    //now do post convertion searches and replaces
+    echo "Performing post conversion processing...\n";
+
+    $convertedFiles = explode("\n",trim(shell_exec("find . -type f -name \"*.zep\"")));
+
+    foreach($convertedFiles as $file) {
+      $fileFilter->postFilter($file);
+    }
+
+    echo "Finished post conversion processing\n";
+
+    echo "Building extension...\n";
+
     echo shell_exec(__DIR__."/vendor/bin/zephir build");
+
   }
 }

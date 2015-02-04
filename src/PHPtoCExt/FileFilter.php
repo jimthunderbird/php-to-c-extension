@@ -6,10 +6,15 @@ class FileFilter
   private $sourceFile;
   private $targetFile;
 
+  private $postSearches;
+  private $postReplaces;
+
   public function __construct($sourceFile, $targetFile)
   {
     $this->sourceFile = $sourceFile;
     $this->targetFile = $targetFile;
+    $this->postSearches = array();
+    $this->postReplaces = array();
   }
 
   public function filter()
@@ -19,17 +24,12 @@ class FileFilter
     //first, remove all comments in file content 
     $sourceFileContent = $this->removeAllComments($sourceFileContent);
     $sourceFileContent = $this->putBracketsInNewLine($sourceFileContent);
+    $sourceFileContent = $this->removeBlankLines($sourceFileContent);
 
     $parser = new \PhpParser\Parser(new \PhpParser\Lexer);
     $serializer = new \PhpParser\Serializer\XML();
 
-    try {
-      $stmts = $parser->parse($sourceFileContent);
-
-      $codeLines = explode("\n", $sourceFileContent);
-      $codeASTXML = $serializer->serialize($stmts);
-      $codeASTXMLLines = explode("\n", $codeASTXML);
-
+    try { 
       //load all converters 
 
       $converterFiles = scandir(__DIR__."/Converter");
@@ -45,22 +45,47 @@ class FileFilter
 
       $searches = array();
       $replaces = array();
+      $postSearches = array();
+      $postReplaces = array();
       //go through all converters to convert the source code 
       foreach ($converterClasses as $converterClass) {
+        $stmts = $parser->parse($sourceFileContent);
+        $codeLines = explode("\n", $sourceFileContent);
+        $codeASTXML = $serializer->serialize($stmts);
+        $codeASTXMLLines = explode("\n", $codeASTXML);
+
         $converter = new $converterClass($codeLines, $codeASTXMLLines);
         $converter->convert();
-        $searches = array_merge($searches, $converter->getSearches());
-        $replaces = array_merge($replaces, $converter->getReplaces());
+        $searches = $converter->getSearches();
+        $replaces = $converter->getReplaces();
+        $sourceFileContent = str_replace($searches, $replaces, $sourceFileContent);
+        file_put_contents($this->targetFile, $sourceFileContent);
+
+        $postSearches = array_merge($postSearches, $converter->getPostSearches());
+        $postReplaces = array_merge($postReplaces, $converter->getPostReplaces());
       }
 
-      $targetFileContent = str_replace($searches, $replaces, $sourceFileContent);
-      file_put_contents($this->targetFile, $targetFileContent);
-
+      $this->postSearches = $postSearches;
+      $this->postReplaces = $postReplaces;
     } catch (\PhpParser\Error $e) {
       throw new PHPtoCExtException("PHP Parser Error: ".$e->getMessage());
     }
 
   } 
+
+  public function postFilter($file)
+  { 
+    $content = file_get_contents($file);
+
+    $searchCount = count($this->postSearches);
+
+    for ($i = 0; $i < $searchCount; $i++) {
+      $content = str_replace($this->postSearches[$i], $this->postReplaces[$i], $content); 
+    }
+
+    $content = $this->removeBlankLines($content);
+    file_put_contents($file, $content);
+  }
 
   /**
    * remove all comments in php code 
@@ -105,8 +130,13 @@ class FileFilter
 
     $result = implode("\n", $lines);
 
-    //now remove all blank lines, credit: http://stackoverflow.com/questions/709669/how-do-i-remove-blank-lines-from-text-in-php   
-    $result = preg_replace("/(^[\r\n]*|[\r\n]+)[\s\t]*[\r\n]+/", "\n", $result);
     return $result;
+  }
+
+  private function removeBlankLines($content)
+  {
+    //now remove all blank lines, credit: http://stackoverflow.com/questions/709669/how-do-i-remove-blank-lines-from-text-in-php   
+    $content = preg_replace("/(^[\r\n]*|[\r\n]+)[\s\t]*[\r\n]+/", "\n", $content);
+    return $content;
   }
 }
