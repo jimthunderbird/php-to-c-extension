@@ -12,7 +12,7 @@ class FileAnalyser
   {
     $this->file = $file; 
     $this->fileContent = file_get_contents($file);
-    $this->userDefinedClasses = $this->getUserDefinedClassesInFile($file);
+    $this->requireFile($file);
   }
 
   public function getNamespaceOfClass($class)
@@ -65,16 +65,18 @@ class FileAnalyser
     return $this->userDefinedClasses;
   }
 
-  private function getUserDefinedClassesInFile() 
+  private function requireFile($file)
   {
     $previousDefinedClasses = get_declared_classes();
+    $previousDefinedInterfaces = get_declared_interfaces();
     require_once $this->file;
     $currentDefinedClasses = get_declared_classes();
+    $currentDefinedInterfaces = get_declared_interfaces();
+
     $userDefinedClasses = array_diff($currentDefinedClasses, $previousDefinedClasses);
-    $result = [];
-    foreach($userDefinedClasses as $class) {
-      $result[] = $class;
-    }
-    return $result;
+    $userDefinedInterfaces = array_diff($currentDefinedInterfaces, $previousDefinedInterfaces);
+
+    //now treat classes and interfaces as the same 
+    $this->userDefinedClasses = array_merge($userDefinedClasses, $userDefinedInterfaces); 
   }
 }
