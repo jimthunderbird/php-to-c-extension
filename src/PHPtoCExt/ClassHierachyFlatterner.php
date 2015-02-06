@@ -35,7 +35,7 @@ class ClassHierachyFlatterner
         $classInfo->endLine = (int)str_replace(array("<scalar:int>","</scalar:int>"),"",$this->codeASTXMLLines[$index + 5]);
         $classInfo->namespace = $namespace;
         $classInfo->className = "\\".$namespace."\\".trim(str_replace(array("<scalar:string>","</scalar:string>"),"",$this->codeASTXMLLines[$index + 11])); 
-        $classInfo->methods = array();
+        $classInfo->methodInfos = array();
         $className = $classInfo->className;
 
         $classInfos[] = $classInfo;   
@@ -47,6 +47,7 @@ class ClassHierachyFlatterner
         $classMethodInfo->endLine = (int)str_replace(array("<scalar:int>","</scalar:int>"),"",$this->codeASTXMLLines[$index + 5]);
         $startLineContent = $this->codeLines[$classMethodInfo->startLine - 1];
         $classMethodInfo->name = trim(explode(" ",explode("function ",$startLineContent)[1])[0]);
+        $classMethodInfo->pureName = explode(" ", str_replace("(", " ", $classMethodInfo->name))[0];
         //now figure out where it is public, protected or private 
 
         //find out all methods belongs to this class
@@ -66,7 +67,7 @@ class ClassHierachyFlatterner
           $classMethodInfo->isStatic = false;
         }
 
-        $classMap[$className]->methodInfos[] = $classMethodInfo;
+        $classMap[$className]->methodInfos[$classMethodInfo->pureName] = $classMethodInfo;
       }
     }
 
@@ -85,7 +86,9 @@ class ClassHierachyFlatterner
 
       $currentClassCode = implode("\n",array_slice($this->codeLines, $currentClassInfo->startLine - 1, $currentClassInfo->endLine - $currentClassInfo->startLine + 1)); 
 
-      $parentMethodCode = "";
+      $currentClassMethodInfos = $currentClassInfo->methodInfos;
+
+      $injectedCode = "";
       while(TRUE) {
         if (!isset($currentClassInfo->parentClass)) { 
           break;
@@ -93,25 +96,37 @@ class ClassHierachyFlatterner
 
         $currentClassEndLine = $currentClassInfo->endLine;
 
-        $currentClassInfo = $classMap[$currentClassInfo->parentClass];
+        $currentClassInfo = $classMap[$currentClassInfo->parentClass]; //point current class info to the parent one
 
-        foreach($currentClassInfo->methodInfos as $methodInfo) {
+        foreach($currentClassInfo->methodInfos as $methodPureName => $methodInfo) {
           $methodCode = implode("\n",array_slice($this->codeLines, $methodInfo->startLine - 1, $methodInfo->endLine - $methodInfo->startLine + 1));
+
+          if (!isset($currentClassMethodInfos[$methodPureName])) { //the current class does not have method defined, grab the parent version 
+            $currentClassMethodInfos[$methodPureName] = $methodCode;
+            //now replace parent:: to __[namespace components] and replace static:: to self::
+            $convertedMethodCode = str_replace( array("parent::","static::"),array(str_replace("\\","__",$currentClassInfo->parentClass)."_","self::"), $methodCode);
+
+            $injectedCode .= "\n".$convertedMethodCode."\n"; 
+          }
+
           $convertedMethodCode = str_replace("function ".$methodInfo->name, "function ".str_replace("\\","__",$currentClassInfo->className."_".$methodInfo->name), $methodCode);
-          $parentMethodCode .= "\n".$convertedMethodCode."\n";
+          //now replace parent:: to __[namespace components] and replace static:: to self::
+          $convertedMethodCode = str_replace( array("parent::","static::"),array(str_replace("\\","__",$currentClassInfo->parentClass)."_","self::"), $convertedMethodCode);
+
+          $injectedCode.= "\n".$convertedMethodCode."\n";
+
         }
       }
 
-      if (strlen($parentMethodCode) > 0) {
+      if (strlen($injectedCode) > 0) {
         $currentClassCodeLines = explode("\n", $currentClassCode);
-        $currentClassCodeLines[count($currentClassCodeLines) - 2] .= $parentMethodCode."\n";
+        $currentClassCodeLines[count($currentClassCodeLines) - 2] .= $injectedCode."\n";
         $newClassCode = implode("\n", $currentClassCodeLines);
         $content = str_replace($currentClassCode, $newClassCode, $content);
       }
     }
 
     print $content;exit();
-
     file_put_contents($targetFile, $content);  
   }
 }
