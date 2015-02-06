@@ -16,11 +16,15 @@ class ClassHierarchyFlatterningConverter extends \PHPtoCExt\Converter
 
       $currentClassCode = implode("\n",array_slice($this->codeLines, $currentClassInfo->startLine - 1, $currentClassInfo->endLine - $currentClassInfo->startLine + 1)); 
 
+      $currentClassProperties = $currentClassInfo->properties;
+      $currentClassStaticProperties = $currentClassInfo->staticProperties;
+
       $currentClassMethodInfos = $currentClassInfo->methodInfos;
 
       $currentParentClass = isset($currentClassInfo->parentClass)?$currentClassInfo->parentClass:null;
 
-      $injectedCode = "";
+      $injectedPropertiesCode = "";
+      $injectedMethodsCode = "";
 
       while(TRUE) {
         if (!isset($currentClassInfo->parentClass)) { 
@@ -30,6 +34,24 @@ class ClassHierarchyFlatterningConverter extends \PHPtoCExt\Converter
         $currentClassEndLine = $currentClassInfo->endLine;
 
         $parentClassInfo = $classMap[$currentClassInfo->parentClass]; //point current class info to the parent one 
+
+        //inject the properties that are defined in parent but not in current class 
+        $staticPropertiesToBeInjected = array_udiff($parentClassInfo->staticProperties, $currentClassInfo->staticProperties, function($a,$b){
+          return ($a->name === $b->name);
+        });
+
+        $propertiesToBeInjected = array_udiff($parentClassInfo->properties, $currentClassInfo->properties, function($a,$b){
+          return ($a->name === $b->name);
+        });
+
+
+        foreach($staticPropertiesToBeInjected as $propertyInfo) {
+          $injectedPropertiesCode .= "\n".$propertyInfo->code."\n";
+        }
+
+        foreach($propertiesToBeInjected as $propertyInfo) {
+          $injectedPropertiesCode .= "\n".$propertyInfo->code."\n";
+        }
 
         foreach($parentClassInfo->methodInfos as $methodPureName => $methodInfo) {
           $methodCode = implode("\n",array_slice($this->codeLines, $methodInfo->startLine - 1, $methodInfo->endLine - $methodInfo->startLine + 1)); 
@@ -44,7 +66,7 @@ class ClassHierarchyFlatterningConverter extends \PHPtoCExt\Converter
             if (isset($parentClassInfo->parentClass)) {
               $convertedMethodCode = str_replace("parent::",$selfReference.strtolower(str_replace("\\","__",$parentClassInfo->parentClass))."_", $methodCode);
             }
-            $injectedCode .= "\n".$convertedMethodCode."\n"; 
+            $injectedMethodsCode .= "\n".$convertedMethodCode."\n"; 
           } 
 
           $convertedMethodCode = str_replace("function ".$methodInfo->name, "function ".strtolower(str_replace("\\","__",$parentClassInfo->className)."_".$methodInfo->name), $methodCode);
@@ -53,7 +75,7 @@ class ClassHierarchyFlatterningConverter extends \PHPtoCExt\Converter
             $convertedMethodCode = str_replace("parent::",$selfReference.strtolower(str_replace("\\","__",$parentClassInfo->parentClass))."_", $convertedMethodCode);
           }
 
-          $injectedCode.= "\n".$convertedMethodCode."\n";
+          $injectedMethodsCode.= "\n".$convertedMethodCode."\n";
 
         }
 
@@ -61,9 +83,11 @@ class ClassHierarchyFlatterningConverter extends \PHPtoCExt\Converter
       }
 
       $newClassCode = $currentClassCode;
-      if (strlen($injectedCode) > 0) {
+      if (strlen($injectedMethodsCode) > 0) {
         $currentClassCodeLines = explode("\n", $currentClassCode);
-        $currentClassCodeLines[count($currentClassCodeLines) - 2] .= $injectedCode."\n";
+        //now remove any extends words so that each class is an independent unit!!!
+        $currentClassCodeLines[0] = explode(" extends ", $currentClassCodeLines[0])[0];
+        $currentClassCodeLines[count($currentClassCodeLines) - 2] .= $injectedPropertiesCode."\n".$injectedMethodsCode."\n";
         $newClassCode = implode("\n", $currentClassCodeLines);
       }
 
