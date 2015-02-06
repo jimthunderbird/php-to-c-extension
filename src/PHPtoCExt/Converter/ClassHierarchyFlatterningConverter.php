@@ -131,6 +131,7 @@ class ClassHierarchyFlatterningConverter extends \PHPtoCExt\Converter
 
       //finally, in the zephir code, we need to replace {self}:: to self::
       $this->postSearchAndReplace("{self}::","self::");
+      $this->postSearchAndReplace(" static()"," self()");
     }
   }
 }
