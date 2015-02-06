@@ -37,16 +37,15 @@ class StaticVarAutoDefineConverter extends \PHPtoCExt\Converter
 
       }
 
-      $classPropertyCode = implode("\n",array_slice($this->codeLines, $classPropertyStartLine, $classPropertyEndLine - $classPropertyStartLine)); 
-
       $definedStaticVars = array();
       for ($j = $classPropertyStartLine; $j <= $classPropertyEndLine; $j++) {
         $line = $this->codeLines[$j-1];
         if (strpos($line, "static ") !== FALSE) {
-          $definedStaticVars[] = trim(explode("=",explode("static ", $line)[1])[0]);
+          $definedStaticVars[] = str_replace("$","",trim(explode("=",explode("static ", $line)[1])[0]));
         }
       }
 
+      $undefinedStaticVars = array();
       $undefinedStaticVars = array_diff($staticVars, $definedStaticVars);
 
       $defineStaticVarStmt = "";
@@ -55,10 +54,10 @@ class StaticVarAutoDefineConverter extends \PHPtoCExt\Converter
         $defineStaticVarStmt .= "protected static $".$var.";\n";  
       }
 
-      $newClassPropertyCode = $defineStaticVarStmt.$classPropertyCode;
+      $this->codeLines[$classPropertyStartLine - 1] .= "\n".$defineStaticVarStmt."\n";
 
-      $newClassCode = str_replace($classPropertyCode, $newClassPropertyCode, $classCode);
-      
+      $newClassCode = implode("\n",array_slice($this->codeLines, $classInfo->startLine - 1, $classInfo->endLine - $classInfo->startLine + 1));
+
       $this->searchAndReplace($classCode, $newClassCode);
     }
   }
