@@ -9,6 +9,9 @@ class FileFilter
   private $postSearches;
   private $postReplaces;
 
+  private $codeLines;
+  private $codeASTXMLLines;
+
   public function __construct($sourceFile, $targetFile)
   {
     $this->sourceFile = $sourceFile;
@@ -54,6 +57,9 @@ class FileFilter
         $codeASTXML = $serializer->serialize($stmts);
         $codeASTXMLLines = explode("\n", $codeASTXML);
 
+        $this->codeLines = $codeLines;
+        $this->codeASTXMLLines = $codeASTXMLLines;
+
         $converter = new $converterClass($codeLines, $codeASTXMLLines);
         $converter->convert();
         $searches = $converter->getSearches();
@@ -66,8 +72,10 @@ class FileFilter
 
       file_put_contents($this->targetFile, $sourceFileContent);
 
+      //add post searches and replaces 
       $this->postSearches = $postSearches;
       $this->postReplaces = $postReplaces;
+
     } catch (\PhpParser\Error $e) {
       throw new PHPtoCExtException("PHP Parser Error: ".$e->getMessage());
     }
@@ -86,6 +94,16 @@ class FileFilter
 
     $content = $this->removeBlankLines($content);
     file_put_contents($file, $content);
+  }
+
+  public function getCodeLines()
+  {
+    return $this->codeLines;
+  }
+
+  public function getCodeASTXMLLines()
+  {
+    return $this->codeASTXMLLines;
   }
 
   /**
