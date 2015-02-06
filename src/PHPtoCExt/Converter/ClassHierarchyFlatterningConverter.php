@@ -127,6 +127,9 @@ class ClassHierarchyFlatterningConverter extends \PHPtoCExt\Converter
         $currentClassCodeLines = explode("\n", $currentClassCode);
         $currentClassCodeLines[count($currentClassCodeLines) - 2] .= $injectedCode."\n";
         $newClassCode = implode("\n", $currentClassCodeLines);
+      }
+
+      if (strlen($currentParentClass) > 0) {
         //we still need to convert parent:: to $selfReference 
         $newClassCode = str_replace("parent::",$selfReference.strtolower(str_replace("\\","__",$currentParentClass))."_", $newClassCode);
       }
