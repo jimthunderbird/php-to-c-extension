@@ -80,7 +80,10 @@ class ClassHierarchyFlatterningConverter extends \PHPtoCExt\Converter
 
       $currentClassMethodInfos = $currentClassInfo->methodInfos;
 
+      $currentParentClass = isset($currentClassInfo->parentClass)?$currentClassInfo->parentClass:null;
+
       $injectedCode = "";
+
       while(TRUE) {
         if (!isset($currentClassInfo->parentClass)) { 
           break;
@@ -88,9 +91,9 @@ class ClassHierarchyFlatterningConverter extends \PHPtoCExt\Converter
 
         $currentClassEndLine = $currentClassInfo->endLine;
 
-        $currentClassInfo = $classMap[$currentClassInfo->parentClass]; //point current class info to the parent one 
+        $parentClassInfo = $classMap[$currentClassInfo->parentClass]; //point current class info to the parent one 
  
-        foreach($currentClassInfo->methodInfos as $methodPureName => $methodInfo) {
+        foreach($parentClassInfo->methodInfos as $methodPureName => $methodInfo) {
           $methodCode = implode("\n",array_slice($this->codeLines, $methodInfo->startLine - 1, $methodInfo->endLine - $methodInfo->startLine + 1)); 
 
           $selfReference = $methodInfo->isStatic?"\$self::":"\$this->";
@@ -100,21 +103,23 @@ class ClassHierarchyFlatterningConverter extends \PHPtoCExt\Converter
           if (!isset($currentClassMethodInfos[$methodPureName])) { //the current class does not have method defined, grab the parent version 
             $currentClassMethodInfos[$methodPureName] = $methodCode;
             //now replace parent:: to __[namespace components]
-            if (isset($currentClassInfo->parentClass)) {
-              $convertedMethodCode = str_replace("parent::",$selfReference.strtolower(str_replace("\\","__",$currentClassInfo->parentClass))."_", $methodCode);
+            if (isset($parentClassInfo->parentClass)) {
+              $convertedMethodCode = str_replace("parent::",$selfReference.strtolower(str_replace("\\","__",$parentClassInfo->parentClass))."_", $methodCode);
             }
             $injectedCode .= "\n".$convertedMethodCode."\n"; 
-          }
+          } 
 
-          $convertedMethodCode = str_replace("function ".$methodInfo->name, "function ".strtolower(str_replace("\\","__",$currentClassInfo->className)."_".$methodInfo->name), $methodCode);
+          $convertedMethodCode = str_replace("function ".$methodInfo->name, "function ".strtolower(str_replace("\\","__",$parentClassInfo->className)."_".$methodInfo->name), $methodCode);
           //now replace parent:: to __[namespace components] 
-          if (isset($currentClassInfo->parentClass)) {
-            $convertedMethodCode = str_replace("parent::",$selfReference.strtolower(str_replace("\\","__",$currentClassInfo->parentClass))."_", $convertedMethodCode);
+          if (isset($parentClassInfo->parentClass)) {
+            $convertedMethodCode = str_replace("parent::",$selfReference.strtolower(str_replace("\\","__",$parentClassInfo->parentClass))."_", $convertedMethodCode);
           }
 
           $injectedCode.= "\n".$convertedMethodCode."\n";
 
         }
+
+        $currentClassInfo = $parentClassInfo;
       }
 
       $newClassCode = $currentClassCode;
@@ -122,6 +127,8 @@ class ClassHierarchyFlatterningConverter extends \PHPtoCExt\Converter
         $currentClassCodeLines = explode("\n", $currentClassCode);
         $currentClassCodeLines[count($currentClassCodeLines) - 2] .= $injectedCode."\n";
         $newClassCode = implode("\n", $currentClassCodeLines);
+        //we still need to convert parent:: to $selfReference 
+        $newClassCode = str_replace("parent::",$selfReference.strtolower(str_replace("\\","__",$currentParentClass))."_", $newClassCode);
       }
 
       //convert all static to self      
@@ -132,6 +139,7 @@ class ClassHierarchyFlatterningConverter extends \PHPtoCExt\Converter
       //finally, in the zephir code, we need to replace {self}:: to self::
       $this->postSearchAndReplace("{self}::","self::");
       $this->postSearchAndReplace(" static()"," self()");
+
     }
   }
 }
