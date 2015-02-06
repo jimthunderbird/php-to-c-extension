@@ -44,7 +44,6 @@ class ClassHierarchyFlatterningConverter extends \PHPtoCExt\Converter
           return ($a->name === $b->name);
         });
 
-
         foreach($staticPropertiesToBeInjected as $propertyInfo) {
           $injectedPropertiesCode .= "\n".$propertyInfo->code."\n";
         }
@@ -103,7 +102,7 @@ class ClassHierarchyFlatterningConverter extends \PHPtoCExt\Converter
 
       //finally, in the zephir code, we need to replace {self}:: to self::
       $this->postSearchAndReplace("{self}::","self::");
-      $this->postSearchAndReplace(" static()"," self()");
+      $this->postSearchAndReplace(" static("," self(");
 
     }
   }

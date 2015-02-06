@@ -37,12 +37,9 @@ class StaticVarAutoDefineConverter extends \PHPtoCExt\Converter
 
       }
 
-      $definedStaticVars = array();
-      for ($j = $classPropertyStartLine; $j <= $classPropertyEndLine; $j++) {
-        $line = $this->codeLines[$j-1];
-        if (strpos($line, "static ") !== FALSE) {
-          $definedStaticVars[] = str_replace("$","",trim(explode("=",explode("static ", $line)[1])[0]));
-        }
+      $definedStaticVars = array(); 
+      foreach($classInfo->staticProperties as $propertyInfo) {
+        $definedStaticVars[] = $propertyInfo->name;
       }
 
       $undefinedStaticVars = array();
