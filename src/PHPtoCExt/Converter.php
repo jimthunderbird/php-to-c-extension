@@ -62,7 +62,7 @@ abstract class Converter
 
     $namespace = "";
     $className = "";
-
+    
     foreach($this->codeASTXMLLines as $index => $line)
     {
       if (strpos($line,"<node:Stmt_Namespace>") > 0) {
@@ -75,11 +75,34 @@ abstract class Converter
         $classInfo->namespace = $namespace;
         $classInfo->className = "\\".$namespace."\\".trim(str_replace(array("<scalar:string>","</scalar:string>"),"",$this->codeASTXMLLines[$index + 11])); 
         $classInfo->methodInfos = array();
+        $classInfo->properties = array();
+        $classInfo->staticProperties = array();
         $className = $classInfo->className;
 
         $classInfos[] = $classInfo;   
 
         $classMap[$classInfo->className] = $classInfo;
+      } else if (strpos($line, "<node:Stmt_Property>") > 0) {
+        $propertyStartLine = (int)str_replace(array("<scalar:int>","</scalar:int>"),"",$this->codeASTXMLLines[$index + 2]);
+        $propertyCode = $this->codeLines[$propertyStartLine - 1];
+        $propertyInfo = new \stdClass();
+
+        $propertyStartPos = strpos($propertyCode, "$");
+        $propertyEndPos = strpos($propertyCode, ";");
+
+        $propertyComps = explode("=",substr($propertyCode, $propertyStartPos + 1, $propertyEndPos - $propertyStartPos + 1));
+
+        $propertyInfo->name = trim($propertyComps[0]);
+        $propertyInfo->value = trim($propertyComps[1]);
+        $propertyInfo->code = $propertyCode; 
+
+        if(strpos($propertyCode, "static ") !== FALSE) {
+          //this is a static property 
+          $classMap[$className]->staticProperties[] = $propertyInfo;
+        } else {
+          //this is a dynamic property   
+          $classMap[$className]->properties[] = $propertyInfo;
+        }
       } else if (strpos($line,"<node:Stmt_ClassMethod>") > 0) {
         $classMethodInfo = new \stdClass();
         $classMethodInfo->startLine = (int)str_replace(array("<scalar:int>","</scalar:int>"),"",$this->codeASTXMLLines[$index + 2]);
