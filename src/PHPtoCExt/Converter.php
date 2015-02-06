@@ -90,10 +90,14 @@ abstract class Converter
         $propertyStartPos = strpos($propertyCode, "$");
         $propertyEndPos = strpos($propertyCode, ";");
 
-        $propertyComps = explode("=",substr($propertyCode, $propertyStartPos + 1, $propertyEndPos - $propertyStartPos + 1));
+        $propertyComps = explode("=",substr($propertyCode, $propertyStartPos + 1, $propertyEndPos - $propertyStartPos - 1));
 
         $propertyInfo->name = trim($propertyComps[0]);
-        $propertyInfo->value = trim($propertyComps[1]);
+        $propertyInfo->value = null;
+        //some property might not have a value;
+        if (count($propertyComps) > 1) {
+          $propertyInfo->value = str_replace('"',"'", trim($propertyComps[1]));
+        }
         $propertyInfo->code = $propertyCode; 
 
         if(strpos($propertyCode, "static ") !== FALSE) {
@@ -108,7 +112,7 @@ abstract class Converter
         $classMethodInfo->startLine = (int)str_replace(array("<scalar:int>","</scalar:int>"),"",$this->codeASTXMLLines[$index + 2]);
         $classMethodInfo->endLine = (int)str_replace(array("<scalar:int>","</scalar:int>"),"",$this->codeASTXMLLines[$index + 5]);
         $startLineContent = $this->codeLines[$classMethodInfo->startLine - 1];
-        $classMethodInfo->name = trim(explode(" ",explode("function ",$startLineContent)[1])[0]);
+        $classMethodInfo->name = trim(explode("function ",$startLineContent)[1]);
         $classMethodInfo->pureName = explode(" ", str_replace("(", " ", $classMethodInfo->name))[0];
         //now figure out where it is public, protected or private 
 
