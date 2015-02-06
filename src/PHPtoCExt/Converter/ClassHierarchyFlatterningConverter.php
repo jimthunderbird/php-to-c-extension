@@ -1,6 +1,9 @@
 <?php 
 namespace PHPtoCExt\Converter;
 
+/**
+ * Flattern the class hierarchy by creating duplicates of methods over the inheritance chain
+ */
 class ClassHierarchyFlatterningConverter extends \PHPtoCExt\Converter
 {
   public function convert() 
@@ -90,19 +93,19 @@ class ClassHierarchyFlatterningConverter extends \PHPtoCExt\Converter
         foreach($currentClassInfo->methodInfos as $methodPureName => $methodInfo) {
           $methodCode = implode("\n",array_slice($this->codeLines, $methodInfo->startLine - 1, $methodInfo->endLine - $methodInfo->startLine + 1));
 
-          $self_prepend = $methodInfo->isStatic?"\$self::":"";
+          $selfReference = $methodInfo->isStatic?"\$self::":"\$this->";
 
           if (!isset($currentClassMethodInfos[$methodPureName])) { //the current class does not have method defined, grab the parent version 
             $currentClassMethodInfos[$methodPureName] = $methodCode;
             //now replace parent:: to __[namespace components]
-            $convertedMethodCode = str_replace("parent::",$self_prepend.strtolower(str_replace("\\","__",$currentClassInfo->parentClass))."_", $methodCode);
+            $convertedMethodCode = str_replace("parent::",$selfReference.strtolower(str_replace("\\","__",$currentClassInfo->parentClass))."_", $methodCode);
             $injectedCode .= "\n".$convertedMethodCode."\n"; 
           }
 
           $convertedMethodCode = str_replace("function ".$methodInfo->name, "function ".strtolower(str_replace("\\","__",$currentClassInfo->className)."_".$methodInfo->name), $methodCode);
           //now replace parent:: to __[namespace components] 
           if (isset($currentClassInfo->parentClass)) {
-            $convertedMethodCode = str_replace("parent::",$self_prepend.strtolower(str_replace("\\","__",$currentClassInfo->parentClass))."_", $convertedMethodCode);
+            $convertedMethodCode = str_replace("parent::",$selfReference.strtolower(str_replace("\\","__",$currentClassInfo->parentClass))."_", $convertedMethodCode);
           }
 
           $injectedCode.= "\n".$convertedMethodCode."\n";

@@ -33,18 +33,15 @@ class FileFilter
     $serializer = new \PhpParser\Serializer\XML();
 
     try { 
-      //load all converters 
-
-      $converterFiles = scandir(__DIR__."/Converter");
-      $converterClasses = array();
-      foreach($converterFiles as $f) {
-        if ($f !== "." && $f !== "..") {
-          $fileInfo = new \SplFileInfo($f);
-          if ($fileInfo->getExtension() == "php") {
-            $converterClasses[] = str_replace(".php","",__NAMESPACE__."\\Converter\\".$fileInfo->getBaseName());
-          } 
-        }
-      }
+      //load all converters, order is very important
+      $converterClasses = array(
+        "\PHPtoCExt\Converter\ForLoopToWhileLoopConverter",
+        "\PHPtoCExt\Converter\PrintToEchoConverter",
+        "\PHPtoCExt\Converter\ModuloCastingConverter",
+        "\PHPtoCExt\Converter\SelfStaticConverter",
+        "\PHPtoCExt\Converter\TraitMergingConverter",
+        "\PHPtoCExt\Converter\ClassHierarchyFlatterningConverter"
+      );
 
       $searches = array();
       $replaces = array();
