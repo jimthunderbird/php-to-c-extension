@@ -39,6 +39,7 @@ $ php [path/to/php-to-c-extension]/build_extensions.php [directory containing ph
 + [Calling method in the base class with parent::](#example-08)
 + [Using the self keyword](#example-09)
 + [Using ternary operator](#example-10)
++ [Late static binding](#example-11)
 
 ###Example 01
 
@@ -438,4 +439,30 @@ if ($number->isPositive() === TRUE) {
 }
 ```
 ####We then should see the following printed on the screen.
-####"This is a positive number."
+####"This is a positive number." 
+
+###Example 11 
+####Late static binding is introduced in PHP 5.3 and used to reference the called class in a context of static inheritance.
+####Below is an example of late static binding 
+####Let's create a file named src/dummy.php and it looks like this:
+```php  
+namespace Dummy;
+class Model 
+{ 
+  protected static $name = "model";
+  public static function find() 
+  { 
+    echo static::$name; 
+  } 
+} 
+
+class Product extends Model 
+{ 
+  protected static $name = 'Product'; 
+} 
+``` 
+####Then once we have dummy.so built and if we do the following:
+```php 
+Dummy\Product::find();
+```
+####We should have "Product" printed on the screen.
