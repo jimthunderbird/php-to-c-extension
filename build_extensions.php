@@ -56,9 +56,6 @@ try {
   $fileFilter = new PHPtoCExt\FileFilter($file, $targetFile);
   $fileFilter->filter();
 
-  $flatterner = new PHPtoCExt\ClassHierachyFlatterner($fileFilter->getCodeLines(), $fileFilter->getCodeASTXMLLines());
-  $flatterner->flattern($targetFile);
-
   $analyser = new PHPtoCExt\FileAnalyser($targetFile);
 
   foreach($analyser->getUserDefinedClasses() as $class) {

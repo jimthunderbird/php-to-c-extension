@@ -1,21 +1,10 @@
 <?php 
-namespace PHPtoCExt;
+namespace PHPtoCExt\Converter;
 
-class ClassHierachyFlatterner 
+class ClassHierarchyFlatterningConverter extends \PHPtoCExt\Converter
 {
-  private $codeLines;
-  private $codeASTXMLLines;
-
-  public function __construct($codeLines, $codeASTXMLLines)
+  public function convert() 
   {
-    $this->codeLines = $codeLines;
-    $this->codeASTXMLLines = $codeASTXMLLines;
-  }
-
-  public function flattern($targetFile)
-  {
-    $content = file_get_contents($targetFile);
-
     //get all classes info, with namespace
     $classInfos = array(); 
 
@@ -101,32 +90,40 @@ class ClassHierachyFlatterner
         foreach($currentClassInfo->methodInfos as $methodPureName => $methodInfo) {
           $methodCode = implode("\n",array_slice($this->codeLines, $methodInfo->startLine - 1, $methodInfo->endLine - $methodInfo->startLine + 1));
 
+          $self_prepend = $methodInfo->isStatic?"\$self::":"";
+
           if (!isset($currentClassMethodInfos[$methodPureName])) { //the current class does not have method defined, grab the parent version 
             $currentClassMethodInfos[$methodPureName] = $methodCode;
-            //now replace parent:: to __[namespace components] and replace static:: to self::
-            $convertedMethodCode = str_replace( array("parent::","static::"),array(str_replace("\\","__",$currentClassInfo->parentClass)."_","self::"), $methodCode);
-
+            //now replace parent:: to __[namespace components]
+            $convertedMethodCode = str_replace("parent::",$self_prepend.strtolower(str_replace("\\","__",$currentClassInfo->parentClass))."_", $methodCode);
             $injectedCode .= "\n".$convertedMethodCode."\n"; 
           }
 
-          $convertedMethodCode = str_replace("function ".$methodInfo->name, "function ".str_replace("\\","__",$currentClassInfo->className."_".$methodInfo->name), $methodCode);
-          //now replace parent:: to __[namespace components] and replace static:: to self::
-          $convertedMethodCode = str_replace( array("parent::","static::"),array(str_replace("\\","__",$currentClassInfo->parentClass)."_","self::"), $convertedMethodCode);
+          $convertedMethodCode = str_replace("function ".$methodInfo->name, "function ".strtolower(str_replace("\\","__",$currentClassInfo->className)."_".$methodInfo->name), $methodCode);
+          //now replace parent:: to __[namespace components] 
+          if (isset($currentClassInfo->parentClass)) {
+            $convertedMethodCode = str_replace("parent::",$self_prepend.strtolower(str_replace("\\","__",$currentClassInfo->parentClass))."_", $convertedMethodCode);
+          }
 
           $injectedCode.= "\n".$convertedMethodCode."\n";
 
         }
       }
 
+      $newClassCode = $currentClassCode;
       if (strlen($injectedCode) > 0) {
         $currentClassCodeLines = explode("\n", $currentClassCode);
         $currentClassCodeLines[count($currentClassCodeLines) - 2] .= $injectedCode."\n";
         $newClassCode = implode("\n", $currentClassCodeLines);
-        $content = str_replace($currentClassCode, $newClassCode, $content);
       }
-    }
 
-    print $content;exit();
-    file_put_contents($targetFile, $content);  
+      //convert all static to self      
+      $newClassCode = str_replace("static::","self::", $newClassCode);
+
+      $this->searchAndReplace($currentClassCode, $newClassCode);
+
+      //finally, in the zephir code, we need to replace {self}:: to self::
+      $this->postSearchAndReplace("{self}::","self::");
+    }
   }
 }
