@@ -40,7 +40,6 @@ class FileFilter
         "\PHPtoCExt\Converter\PrintToEchoConverter",
         "\PHPtoCExt\Converter\ModuloCastingConverter",
         "\PHPtoCExt\Converter\ClassHierarchyFlatterningConverter",
-        "\PHPtoCExt\Converter\SelfStaticConverter"
       );
 
       $searches = array();
