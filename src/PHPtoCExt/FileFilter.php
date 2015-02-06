@@ -41,6 +41,7 @@ class FileFilter
         "\PHPtoCExt\Converter\ModuloCastingConverter",
         "\PHPtoCExt\Converter\IssetToNotEmptyConverter",
         "\PHPtoCExt\Converter\ClassHierarchyFlatterningConverter",
+        "\PHPtoCExt\Converter\LocalVariableInitConverter",
         "\PHPtoCExt\Converter\SelfStaticConverter",
       );
 
