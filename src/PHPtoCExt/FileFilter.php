@@ -39,6 +39,7 @@ class FileFilter
         "\PHPtoCExt\Converter\ForLoopToWhileLoopConverter",
         "\PHPtoCExt\Converter\PrintToEchoConverter",
         "\PHPtoCExt\Converter\ModuloCastingConverter",
+        "\PHPtoCExt\Converter\IssetToNotEmptyConverter",
         "\PHPtoCExt\Converter\ClassHierarchyFlatterningConverter",
         "\PHPtoCExt\Converter\SelfStaticConverter",
       );
