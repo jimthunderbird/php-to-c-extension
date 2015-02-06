@@ -88,17 +88,21 @@ class ClassHierarchyFlatterningConverter extends \PHPtoCExt\Converter
 
         $currentClassEndLine = $currentClassInfo->endLine;
 
-        $currentClassInfo = $classMap[$currentClassInfo->parentClass]; //point current class info to the parent one
-
+        $currentClassInfo = $classMap[$currentClassInfo->parentClass]; //point current class info to the parent one 
+ 
         foreach($currentClassInfo->methodInfos as $methodPureName => $methodInfo) {
-          $methodCode = implode("\n",array_slice($this->codeLines, $methodInfo->startLine - 1, $methodInfo->endLine - $methodInfo->startLine + 1));
+          $methodCode = implode("\n",array_slice($this->codeLines, $methodInfo->startLine - 1, $methodInfo->endLine - $methodInfo->startLine + 1)); 
 
           $selfReference = $methodInfo->isStatic?"\$self::":"\$this->";
+
+          $convertedMethodCode = $methodCode;
 
           if (!isset($currentClassMethodInfos[$methodPureName])) { //the current class does not have method defined, grab the parent version 
             $currentClassMethodInfos[$methodPureName] = $methodCode;
             //now replace parent:: to __[namespace components]
-            $convertedMethodCode = str_replace("parent::",$selfReference.strtolower(str_replace("\\","__",$currentClassInfo->parentClass))."_", $methodCode);
+            if (isset($currentClassInfo->parentClass)) {
+              $convertedMethodCode = str_replace("parent::",$selfReference.strtolower(str_replace("\\","__",$currentClassInfo->parentClass))."_", $methodCode);
+            }
             $injectedCode .= "\n".$convertedMethodCode."\n"; 
           }
 

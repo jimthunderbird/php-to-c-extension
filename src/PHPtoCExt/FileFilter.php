@@ -35,12 +35,12 @@ class FileFilter
     try { 
       //load all converters, order is very important
       $converterClasses = array(
+        "\PHPtoCExt\Converter\TraitMergingConverter",
         "\PHPtoCExt\Converter\ForLoopToWhileLoopConverter",
         "\PHPtoCExt\Converter\PrintToEchoConverter",
         "\PHPtoCExt\Converter\ModuloCastingConverter",
-        "\PHPtoCExt\Converter\SelfStaticConverter",
-        "\PHPtoCExt\Converter\TraitMergingConverter",
-        "\PHPtoCExt\Converter\ClassHierarchyFlatterningConverter"
+        "\PHPtoCExt\Converter\ClassHierarchyFlatterningConverter",
+        "\PHPtoCExt\Converter\SelfStaticConverter"
       );
 
       $searches = array();
