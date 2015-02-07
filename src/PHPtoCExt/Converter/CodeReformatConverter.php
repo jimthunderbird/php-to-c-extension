@@ -15,7 +15,8 @@ class CodeReformatConverter extends \PHPtoCExt\Converter
       $originalClassContent = implode("\n",array_slice($this->codeLines, $classInfo->startLine - 1, $classInfo->endLine - $classInfo->startLine + 1));
 
       $content = "namespace ".$classInfo->namespace.";\n";
-      $content .= "class ".array_pop(explode("\\",$classInfo->className))."\n";
+      $abstract = $classInfo->isAbstract ? "abstract" : "";
+      $content .= "$abstract class ".array_pop(explode("\\",$classInfo->className))."\n";
       $content .= "{\n";
       
       ///////// Static Properties //////////// 

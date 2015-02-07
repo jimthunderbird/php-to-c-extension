@@ -71,6 +71,11 @@ abstract class Converter
       } else if (strpos($line,"<node:Stmt_Class>") > 0) {
         $classInfo = new \stdClass();
         $classInfo->startLine = (int)str_replace(array("<scalar:int>","</scalar:int>"),"",$this->codeASTXMLLines[$index + 2]);
+        //is it an abstract class?
+        $classInfo->isAbstract = false;
+        if (strpos(trim($startLine), "abstract ") == 0) {
+          $classInfo->isAbstract = true;
+        }
         $classInfo->endLine = (int)str_replace(array("<scalar:int>","</scalar:int>"),"",$this->codeASTXMLLines[$index + 5]);
         $classInfo->namespace = $namespace;
         $classInfo->className = "\\".$namespace."\\".trim(str_replace(array("<scalar:string>","</scalar:string>"),"",$this->codeASTXMLLines[$index + 11])); 
