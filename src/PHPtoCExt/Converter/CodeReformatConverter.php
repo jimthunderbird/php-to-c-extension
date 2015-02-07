@@ -14,8 +14,6 @@ class CodeReformatConverter extends \PHPtoCExt\Converter
 
       $originalClassContent = implode("\n",array_slice($this->codeLines, $classInfo->startLine - 1, $classInfo->endLine - $classInfo->startLine + 1));
 
-      //maybe put them into a template ... ?
-      $indentation = str_repeat(" ",2);
       $content = "namespace ".$classInfo->namespace.";\n";
       $content .= "class ".array_pop(explode("\\",$classInfo->className))."\n";
       $content .= "{\n";
