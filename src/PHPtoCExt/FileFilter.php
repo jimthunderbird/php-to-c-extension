@@ -9,6 +9,8 @@ class FileFilter
   private $postSearches;
   private $postReplaces;
 
+  private $converter;
+
   private $codeLines;
   private $codeASTXMLLines;
 
@@ -43,6 +45,7 @@ class FileFilter
         "\PHPtoCExt\Converter\ClassHierarchyFlatterningConverter",
         "\PHPtoCExt\Converter\StaticVarAutoDefineConverter",
         "\PHPtoCExt\Converter\SelfStaticConverter",
+        "\PHPtoCExt\Converter\CodeReformatConverter" //finally reformat the code and get ready for the final conversion
       );
 
       $searches = array();
@@ -59,14 +62,14 @@ class FileFilter
         $this->codeLines = $codeLines;
         $this->codeASTXMLLines = $codeASTXMLLines;
 
-        $converter = new $converterClass($codeLines, $codeASTXMLLines);
-        $converter->convert();
-        $searches = $converter->getSearches();
-        $replaces = $converter->getReplaces();
+        $this->converter = new $converterClass($codeLines, $codeASTXMLLines);
+        $this->converter->convert();
+        $searches = $this->converter->getSearches();
+        $replaces = $this->converter->getReplaces();
         $sourceFileContent = str_replace($searches, $replaces, $sourceFileContent);
 
-        $postSearches = array_merge($postSearches, $converter->getPostSearches());
-        $postReplaces = array_merge($postReplaces, $converter->getPostReplaces());
+        $postSearches = array_merge($postSearches, $this->converter->getPostSearches());
+        $postReplaces = array_merge($postReplaces, $this->converter->getPostReplaces());
       }
 
       file_put_contents($this->targetFile, $sourceFileContent);
@@ -103,6 +106,11 @@ class FileFilter
   public function getCodeASTXMLLines()
   {
     return $this->codeASTXMLLines;
+  }
+
+  public function getClassMap()
+  {
+    return $this->converter->getClassMap();
   }
 
   /**

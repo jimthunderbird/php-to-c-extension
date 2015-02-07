@@ -53,7 +53,7 @@ abstract class Converter
   }
 
   //some util methods for all converters to use, maybe refactor later on to a better place?
-  protected function getClassMap()
+  public function getClassMap()
   {
     //get all classes info, with namespace
     $classInfos = array(); 
@@ -148,8 +148,6 @@ abstract class Converter
 
     return $classMap;
   }
-
-
 
   abstract public function convert(); 
 }
