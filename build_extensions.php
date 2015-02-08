@@ -55,7 +55,7 @@ try {
 
   $fileFilter = new PHPtoCExt\FileFilter($file, $targetFile);
   $fileFilter->filter();
-
+   
   $analyser = new PHPtoCExt\FileAnalyser($targetFile);
 
   foreach($analyser->getUserDefinedClasses() as $class) {
