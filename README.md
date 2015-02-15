@@ -500,7 +500,7 @@ class Sorter
 $ php [path/to/php-to-c-extension]/build_extensions.php src/dummy.php
 ```
 ####Then we will have dummy.so built.
-####Now we will be writing our userland testing code
+####Now we will be writing our userland testing code test.php
 ```php 
 <?php 
 if (!class_exists("Dummy\Sorter")) {
