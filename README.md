@@ -544,4 +544,4 @@ extenion=dummy.so
 ```
 ####Then if we do php -c php.ini test.php, we will be using the dummy.so to do the bubble sort for us, in my laptop it shows the following:
 ####Time spent on sorting: 3.9628620147705 seconds.
-####As you can see, the php extension dummy.so that we built is about 75% faster than the pure php version. And we are seamlessly using the same Dummy\Sorter class!
+####As you can see, the php extension dummy.so that we built is about 3 times faster than the pure php version. And we are seamlessly using the same Dummy\Sorter class!
