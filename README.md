@@ -40,6 +40,7 @@ $ php [path/to/php-to-c-extension]/build_extensions.php [directory containing ph
 + [Using the self keyword](#example-09)
 + [Using ternary operator](#example-10)
 + [Late static binding](#example-11)
++ [Performance Benchmark: Bubble Sort](#example-12)
 
 ###Example 01
 
@@ -466,3 +467,81 @@ class Product extends Model
 Dummy\Product::find();
 ```
 ####We should have "Product" printed on the screen.
+
+###Example 12 
+####Below let's do a simple benchmark to see how fast the php extension will be 
+####We will be using bubble sort as an example to demonstrate the time difference. Here is our code for src/dummy.php:
+```php 
+<?php 
+namespace Dummy;
+
+class Sorter
+{
+  public function bubbleSort($arr)
+  {
+    $size = count($arr);
+    for ($i=0; $i<$size; $i++) {
+      for ($j=0; $j<$size-1-$i; $j++) {
+        if ($arr[$j+1] < $arr[$j]) {
+          $tmp = $arr[$j];
+          $arr[$j] = $arr[$j+1];
+          $arr[$j+1] = $tmp;
+        }
+      }
+    }
+
+    return $arr;
+  }
+}
+```
+####As you can see, this is a very typical bubble sort implementation.
+####We will then do: 
+```sh
+$ php [path/to/php-to-c-extension]/build_extensions.php src/dummy.php
+```
+####Then we will have dummy.so built.
+####Now we will be writing our userland testing code
+```php 
+<?php 
+if (!class_exists("Dummy\Sorter")) {
+  require_once "src/dummy.php";
+}
+
+function microtime_float()
+{
+  list($usec, $sec) = explode(" ", microtime());
+  return ((float)$usec + (float)$sec);
+}
+
+$arr = array();
+for ($i = 10000; $i >= 1; $i--) {
+  $arr[]  = $i;
+}
+
+$time_start = microtime_float();
+
+$st = new Dummy\Sorter();
+$arr = $st->bubbleSort($arr);
+
+$time_end = microtime_float();
+$time = $time_end - $time_start;
+
+print "Time spent on sorting: ".$time." seconds.\n";
+```
+####The code above is pretty straightforward, it first detect if we have the Dummy\Sorter class defined, if it is defined, that means
+####the dummy.so extension is loaded, otherwise, we will just require the pure php version of Dummy\Sorter class. 
+####We then generate an array of 10000 integers and ask Dummy\Sorter to bubble sort it.
+####This is also the beauty of having the ability to write our extension in php itself, since we can seamlessly compare the performance.
+####Now if we just do: 
+```sh 
+php test.php
+```
+####We will be just using the pure php version, in my intel core i3 laptop with 4 core cpu running fedora 21, it shows the following:
+####Time spent on sorting: 16.802139997482 seconds.
+####Now let's test the php extension see how it performs. We first create php.ini and then inside we have:
+```sh 
+extenion=dummy.so
+```
+####Then if we do php -c php.ini test.php, we will be using the dummy.so to do the bubble sort for us, in my laptop it shows the following:
+####Time spent on sorting: 3.9628620147705 seconds.
+####As you can see, the php extension dummy.so that we built is about 75% faster than the pure php version. And we are seamlessly using the same Dummy\Sorter class!
