@@ -540,7 +540,7 @@ php test.php
 ####Time spent on sorting: 16.802139997482 seconds.
 ####Now let's test the php extension see how it performs. We first create php.ini and then inside we have:
 ```sh 
-extenion=dummy.so
+extension=dummy.so
 ```
 ####Then if we do php -c php.ini test.php, we will be using the dummy.so to do the bubble sort for us, in my laptop it shows the following:
 ####Time spent on sorting: 3.9628620147705 seconds.
