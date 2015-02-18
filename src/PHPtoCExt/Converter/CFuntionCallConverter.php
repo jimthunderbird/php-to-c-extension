@@ -19,7 +19,7 @@ class CFuntionCallConverter extends \PHPtoCExt\Converter
       for ($index = $classInfo->startLine; $index <= $classInfo->endLine; $index++) {
         if (preg_match("/call_c_function\(.*\)/", $this->codeLines[$index], $matches)) {
           if(count($matches) == 1) {
-            $codeLine = str_replace(array("call_c_function","(",")",";"),"",trim($this->codeLines[$index]));
+            $codeLine = str_replace(array("call_c_function","(",")",";","$"),"",trim($this->codeLines[$index]));
             $lineComps = explode("=",$codeLine);
             $lineCompsCount = count($lineComps);
             $resultVarName = "";
@@ -27,22 +27,24 @@ class CFuntionCallConverter extends \PHPtoCExt\Converter
               $cFunctionCallComps = explode(",",$lineComps[0]);
               $cFunctionCallComps = explode(",",$lineComps[1]);
               foreach($cFunctionCallComps as $idx => $comp) {
-                $cFunctionCallComps[$idx] = trim(str_replace(array("'",'"',"$"),"",$cFunctionCallComps[$idx]));
+                $cFunctionCallComps[$idx] = trim(str_replace("$","",$cFunctionCallComps[$idx]));
               }
             } else if ($lineCompsCount > 1) { //this means we call the c function and then store the result in a return variable 
               $resultVarName = trim(str_replace("$","",$lineComps[0]));
               $cFunctionCallComps = explode(",",$lineComps[1]);
               foreach($cFunctionCallComps as $idx => $comp) {
-                $cFunctionCallComps[$idx] = trim(str_replace(array("'",'"',"$"),"",$cFunctionCallComps[$idx]));
+                $cFunctionCallComps[$idx] = trim(str_replace("$","",$cFunctionCallComps[$idx]));
               }
             }
 
             if (count($cFunctionCallComps) > 0) {
-              $cSourceFile = array_shift($cFunctionCallComps);
-              $cFUnctionName = array_shift($cFunctionCallComps);
+              $firstComp = array_shift($cFunctionCallComps);
+              $cSourceFile = str_replace(array("'",'"'),"",$firstComp);
+              $secondComp = array_shift($cFunctionCallComps);
+              $cFUnctionName = str_replace(array("'",'"'),"",$secondComp);
               $cFUnctionInputParamsStr = "";
               if (count($cFunctionCallComps) > 0) {
-                $cFUnctionInputParamsStr = implode(",",$cFunctionCallComps); 
+                $cFUnctionInputParamsStr = implode(", ",$cFunctionCallComps); 
               }
               $cFunctionCallCode = "\n%{\n";
               if (strlen($resultVarName) == 0) {
@@ -51,7 +53,9 @@ class CFuntionCallConverter extends \PHPtoCExt\Converter
                 $cFunctionCallCode .= "$resultVarName = ".$cFUnctionName."($cFUnctionInputParamsStr);";
               }
               $cFunctionCallCode .=  "\n}%\n";
-              print $cFunctionCallCode;
+
+              $expectedZephirCode = 'let '.$resultVarName.' =  call_c_function('.$firstComp.', '.$secondComp.', '.implode(", ",$cFunctionCallComps).');';
+              $this->postSearchAndReplace($expectedZephirCode,$cFunctionCallCode);
             }
 
           }
