@@ -59,6 +59,14 @@ class CFuntionCallConverter extends \PHPtoCExt\Converter
 
               $expectedZephirCode = 'let '.$resultVarName.' =  call_c_function('.$firstComp.', '.$secondComp.', '.implode(", ",$cFunctionCallComps).');';
               $this->postSearchAndReplace($expectedZephirCode,$cFunctionCallCode);
+
+              //now, inject the c source code to the top of the class 
+              $namespace = $classInfo->namespace;
+              $classPureName = array_pop(explode("\\",$className));
+              $originalCode = "namespace $namespace;\nclass $classPureName\n{";
+              $cSourceCode = "jim";
+              $withCSourceCode = "namespace $namespace;\n%{\n$cSourceCode\n}%\nclass $classPureName\n{";
+              $this->postSearchAndReplace($originalCode, $withCSourceCode);
             }
 
           }
