@@ -46,7 +46,10 @@ class CFuntionCallConverter extends \PHPtoCExt\Converter
               if (count($cFunctionCallComps) > 0) {
                 $cFUnctionInputParamsStr = implode(", ",$cFunctionCallComps); 
               }
-              $cFunctionCallCode = "\n%{\n";
+
+              $cFunctionCallCode = "";
+              $cFunctionCallCode .= "let $resultVarName = null;\n"; //initialize result var
+              $cFunctionCallCode .= "\n%{\n";
               if (strlen($resultVarName) == 0) {
                 $cFunctionCallCode .= $cFUnctionName."($cFUnctionInputParamsStr);";                 
               } else {
