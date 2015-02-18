@@ -28,10 +28,14 @@ $extensionNames = [];
 $file = "";
 $fileContent = "";
 
+$inputDir = "";
+
 if (is_file($input)) {
   $file = $curDir."/".$input;
+  $inputDir = dirname($file);
   $fileContent = file_get_contents($file);
 } else if (is_dir($input)) {
+  $inputDir = $input;
   $fileContent = "<?php\n";
 
   $files = explode("\n",trim(shell_exec("find $input -type f -name \"*.php\"")));
@@ -53,7 +57,7 @@ $fileFilter = null;
 
 try {
 
-  $fileFilter = new PHPtoCExt\FileFilter($file, $targetFile);
+  $fileFilter = new PHPtoCExt\FileFilter($file, $targetFile, $inputDir);
   $fileFilter->filter();
    
   $analyser = new PHPtoCExt\FileAnalyser($targetFile);

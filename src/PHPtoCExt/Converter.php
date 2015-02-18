@@ -5,15 +5,17 @@ abstract class Converter
 {
   protected $codeLines;
   protected $codeASTXMLLines;
+  protected $inputDir;
   protected $searches;
   protected $replaces;
   protected $postSearches;
   protected $postReplaces;
 
-  public function __construct($codeLines, $codeASTXMLLines)
+  public function __construct($codeLines, $codeASTXMLLines, $inputDir)
   {
     $this->codeLines = $codeLines;
     $this->codeASTXMLLines = $codeASTXMLLines;
+    $this->inputDir = $inputDir;
     $this->searches = array();
     $this->replaces = array();
     $this->postSearches = array();

@@ -63,9 +63,9 @@ class CFuntionCallConverter extends \PHPtoCExt\Converter
               //now, inject the c source code to the top of the class 
               $namespace = $classInfo->namespace;
               $classPureName = array_pop(explode("\\",$className));
-              $originalCode = "namespace $namespace;\nclass $classPureName\n{";
-              $cSourceCode = "jim";
-              $withCSourceCode = "namespace $namespace;\n%{\n$cSourceCode\n}%\nclass $classPureName\n{";
+              $originalCode = "namespace $namespace;\n\n"."class $classPureName\n";
+              $cSourceCode = file_get_contents($this->inputDir."/".$cSourceFile);
+              $withCSourceCode = "%{\n".$cSourceCode."\n}%\n".$originalCode; 
               $this->postSearchAndReplace($originalCode, $withCSourceCode);
             }
 

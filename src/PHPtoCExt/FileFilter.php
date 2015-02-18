@@ -5,6 +5,7 @@ class FileFilter
 {
   private $sourceFile;
   private $targetFile;
+  private $inputDir;
 
   private $postSearches;
   private $postReplaces;
@@ -14,10 +15,11 @@ class FileFilter
   private $codeLines;
   private $codeASTXMLLines;
 
-  public function __construct($sourceFile, $targetFile)
+  public function __construct($sourceFile, $targetFile, $inputDir)
   {
     $this->sourceFile = $sourceFile;
     $this->targetFile = $targetFile;
+    $this->inputDir = $inputDir;
     $this->postSearches = array();
     $this->postReplaces = array();
   }
@@ -63,7 +65,7 @@ class FileFilter
         $this->codeLines = $codeLines;
         $this->codeASTXMLLines = $codeASTXMLLines;
 
-        $this->converter = new $converterClass($codeLines, $codeASTXMLLines);
+        $this->converter = new $converterClass($codeLines, $codeASTXMLLines, $this->inputDir);
         $this->converter->convert();
         $searches = $this->converter->getSearches();
         $replaces = $this->converter->getReplaces();
@@ -107,6 +109,11 @@ class FileFilter
   public function getCodeASTXMLLines()
   {
     return $this->codeASTXMLLines;
+  }
+
+  public function getInputDir()
+  {
+    return $this->inputDir;
   }
 
   public function getClassMap()
