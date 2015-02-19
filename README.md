@@ -41,6 +41,7 @@ $ php [path/to/php-to-c-extension]/build_extensions.php [directory containing ph
 + [Using ternary operator](#example-10)
 + [Late static binding](#example-11)
 + [Performance Benchmark: Bubble Sort](#example-12)
++ [Gain greater speed through raw C code, using call_c_function](#example-13)
 
 ###Example 01
 
@@ -544,4 +545,112 @@ extension=dummy.so
 ```
 ####Then if we do php -c php.ini test.php, we will be using the dummy.so to do the bubble sort for us, in my laptop it shows the following:
 ####Time spent on sorting: 3.9628620147705 seconds.
-####As you can see, the php extension dummy.so that we built is about 3 times faster than the pure php version. And we are seamlessly using the same Dummy\Sorter class!
+####As you can see, the php extension dummy.so that we built is about 3 times faster than the pure php version. And we are seamlessly using the same Dummy\Sorter class! 
+
+###Example 13
+####PHP is built on top of Zend Engine, which is written in C. It will be great that we could use C code inside PHP to gain higher performance.
+####In this tool, we have a way to do so, by using the call_c_function api.
+####In the example below, we will be using the call_c_function api to call the C based bubble sort implementation from within PHP.
+####This example requires advance knowledge of the internal data structure of the Zend Engine.
+####First, let's create src/dummy.php 
+```php 
+<?php 
+namespace Dummy;
+
+class Sorter
+{
+  public function bubbleSort($arr)
+  {
+    $result = call_c_function("sorting.c","test_bubble_sort",$arr);
+
+    return $result;
+  }
+}
+```
+####It is pretty straightforward at this point, we have a Sorter class and inside we have the bubbleSort method, it takes an array $arr and it will return the sorted array. Inside the method, we have this code:
+```php 
+$result = call_c_function("sorting.c","test_bubble_sort",$arr);
+```
+####This means we will be calling the test_bubble_sort function inside of sorting.c file, and the test_bubble_sort function takes $arr as the input parameter. And the result of the test_bubble_sort function call will be stored in the $result variable.
+####Now let's create src/sorting.c file:
+```sh 
+static zval test_bubble_sort(zval * arr)
+{
+  HashTable *arr_hash = arr->value.ht;
+  long arr_length = arr_hash->nNumOfElements;
+  long i,j;
+
+  zval **p;
+
+  long sorting_arr[arr_length];
+  long tmp;
+
+  for (i=0; i < arr_length; i++) {
+    p = (zval **)(arr_hash->arBuckets[i]->pData);
+    sorting_arr[i] = (*p)->value.lval;
+  } 
+
+  //perform bubble sort
+  for (i=0; i< arr_length; i++) {
+    for (j=0; j<arr_length-1-i; j++) {
+      if (sorting_arr[j+1] < sorting_arr[j]) {
+        tmp = sorting_arr[j];
+        sorting_arr[j] = sorting_arr[j+1];
+        sorting_arr[j+1] = tmp;
+      }
+    }
+  }
+
+  for (i=0; i < arr_length; i++) {
+    p = (zval **)(arr_hash->arBuckets[i]->pData);
+    (*p)->value.lval = sorting_arr[i];
+  }
+
+
+  return *arr; 
+}
+``` 
+####To understand what's going on in the test_bubble_sort C function, it requires some knowledge of the internal Zend Engine's data structure.
+####In the function we will accept a poiner to a zval, which is pointing to the array we pass from PHP. Then we create a pointer to the array's hashtable.
+####We then create an array of long integers, holding each long integer value in the arBuckets of the array's hashtable.
+####Later on we perform the standard bubble sort on the long integer array, and finally we update all values in the arBuckets of the array's hashtable and we returna zval back to PHP.
+####Now let's do:
+```sh
+$ php [path/to/php-to-c-extension]/build_extensions.php src/dummy.php
+```
+####Once we have dummy.so built, we can test how fast our bubble sort is now.
+####Let's reuse the test.php script in example 12.
+```php 
+<?php 
+if (!class_exists("Dummy\Sorter")) {
+  require_once "src/dummy.php";
+}
+
+function microtime_float()
+{
+  list($usec, $sec) = explode(" ", microtime());
+  return ((float)$usec + (float)$sec);
+}
+
+$arr = array();
+for ($i = 10000; $i >= 1; $i--) {
+  $arr[]  = $i;
+}
+
+$time_start = microtime_float();
+
+$st = new Dummy\Sorter();
+$arr = $st->bubbleSort($arr);
+
+$time_end = microtime_float();
+$time = $time_end - $time_start;
+
+print "Time spent on sorting: ".$time." seconds.\n";
+```
+####Now if we add extension=dummy.so to a php.ini file and do 
+```sh 
+$ php -c php.ini test.php
+```
+####We will see the following printed on the screen 
+####Time spent on sorting: 0.14397192001343 seconds.
+####The result is really great. Compared to 3.9628620147705 seconds in example 12 and 16.802139997482 seconds for the pure PHP version, it is significantly faster.
