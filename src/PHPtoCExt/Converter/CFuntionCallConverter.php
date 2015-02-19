@@ -15,6 +15,8 @@ class CFuntionCallConverter extends \PHPtoCExt\Converter
 
     $classMap = $this->getClassMap();
 
+    $cSourceCodeMap = array();
+
     foreach($classMap as $className => $classInfo) {
       for ($index = $classInfo->startLine; $index <= $classInfo->endLine; $index++) {
         if (preg_match("/call_c_function\(.*\)/", $this->codeLines[$index], $matches)) {
@@ -64,8 +66,11 @@ class CFuntionCallConverter extends \PHPtoCExt\Converter
               $namespace = $classInfo->namespace;
               $classPureName = array_pop(explode("\\",$className));
               $originalCode = "namespace $namespace;\n\n"."class $classPureName\n";
-              $cSourceCode = file_get_contents($this->inputDir."/".$cSourceFile);
-              $withCSourceCode = "%{\n".$cSourceCode."\n}%\n".$originalCode; 
+              if (!isset($cSourceCodeMap[$cSourceFile])) {
+                $cSourceCode = file_get_contents($this->inputDir."/".$cSourceFile);
+                $cSourceCodeMap[$cSourceFile] = $cSourceCode;
+              }
+              $withCSourceCode = "%{\n".$cSourceCodeMap[$cSourceFile]."\n}%\n".$originalCode; 
               $this->postSearchAndReplace($originalCode, $withCSourceCode);
             }
 
