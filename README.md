@@ -529,8 +529,7 @@ $time = $time_end - $time_start;
 
 print "Time spent on sorting: ".$time." seconds.\n";
 ```
-####The code above is pretty straightforward, it first detect if we have the Dummy\Sorter class defined, if it is defined, that means
-####the dummy.so extension is loaded, otherwise, we will just require the pure php version of Dummy\Sorter class. 
+####The code above is pretty straightforward, it first detect if we have the Dummy\Sorter class defined, if it is defined, that means the dummy.so extension is loaded, otherwise, we will just require the pure php version of Dummy\Sorter class. 
 ####We then generate an array of 10000 integers and ask Dummy\Sorter to bubble sort it.
 ####This is also the beauty of having the ability to write our extension in php itself, since we can seamlessly compare the performance.
 ####Now if we just do: 
@@ -605,7 +604,6 @@ static zval test_bubble_sort(zval * arr)
     p = (zval **)(arr_hash->arBuckets[i]->pData);
     (*p)->value.lval = sorting_arr[i];
   }
-
 
   return *arr; 
 }
