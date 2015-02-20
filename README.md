@@ -536,7 +536,7 @@ print "Time spent on sorting: ".$time." seconds.\n";
 ```sh 
 php test.php
 ```
-####We will be just using the pure php version, in my intel core i3 laptop with 4 core cpu running fedora 21, it shows the following:
+####We will be just using the pure php version, in my intel core i3 laptop with 4 core cpu running fedora 21 and PHP 5.6.4, it shows the following:
 ####Time spent on sorting: 16.802139997482 seconds.
 ####Now let's test the php extension see how it performs. We first create php.ini and then inside we have:
 ```sh 
