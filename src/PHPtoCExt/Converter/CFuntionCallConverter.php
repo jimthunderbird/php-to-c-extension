@@ -69,9 +69,9 @@ class CFuntionCallConverter extends \PHPtoCExt\Converter
               if (!isset($cSourceCodeMap[$cSourceFile])) {
                 $cSourceCode = file_get_contents($this->inputDir."/".$cSourceFile);
                 $cSourceCodeMap[$cSourceFile] = $cSourceCode;
+                $withCSourceCode = "%{\n".$cSourceCodeMap[$cSourceFile]."\n}%\n".$originalCode; 
+                $this->postSearchAndReplace($originalCode, $withCSourceCode);
               }
-              $withCSourceCode = "%{\n".$cSourceCodeMap[$cSourceFile]."\n}%\n".$originalCode; 
-              $this->postSearchAndReplace($originalCode, $withCSourceCode);
             }
 
           }
