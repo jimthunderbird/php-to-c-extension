@@ -66,10 +66,12 @@ class CFuntionCallConverter extends \PHPtoCExt\Converter
               $namespace = $classInfo->namespace;
               $classPureName = array_pop(explode("\\",$className));
               $originalCode = "namespace $namespace;\n\n"."class $classPureName\n";
-              if (!isset($cSourceCodeMap[$cSourceFile])) {
+              //make sure we only have one unique copy of c source file per class
+              $classNameCSourceFileKey = $className.".".$cSourceFile;
+              if (!isset($cSourceCodeMap[$classNameCSourceFileKey])) {
                 $cSourceCode = file_get_contents($this->inputDir."/".$cSourceFile);
-                $cSourceCodeMap[$cSourceFile] = $cSourceCode;
-                $withCSourceCode = "%{\n".$cSourceCodeMap[$cSourceFile]."\n}%\n".$originalCode; 
+                $cSourceCodeMap[$classNameCSourceFileKey] = $cSourceCode;
+                $withCSourceCode = "%{\n".$cSourceCodeMap[$classNameCSourceFileKey]."\n}%\n".$originalCode; 
                 $this->postSearchAndReplace($originalCode, $withCSourceCode);
               }
             }
