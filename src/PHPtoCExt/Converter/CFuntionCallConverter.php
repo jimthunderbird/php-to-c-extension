@@ -27,7 +27,6 @@ class CFuntionCallConverter extends \PHPtoCExt\Converter
             $resultVarName = "";
             if ($lineCompsCount == 1) { //this means we just call the c function and do not have a return variable
               $cFunctionCallComps = explode(",",$lineComps[0]);
-              $cFunctionCallComps = explode(",",$lineComps[1]);
               foreach($cFunctionCallComps as $idx => $comp) {
                 $cFunctionCallComps[$idx] = trim(str_replace("$","",$cFunctionCallComps[$idx]));
               }
@@ -50,16 +49,19 @@ class CFuntionCallConverter extends \PHPtoCExt\Converter
               }
 
               $cFunctionCallCode = "";
-              $cFunctionCallCode .= "let $resultVarName = null;\n"; //initialize result var
-              $cFunctionCallCode .= "\n%{\n";
               if (strlen($resultVarName) == 0) {
+                $cFunctionCallCode .= "\n%{\n";
                 $cFunctionCallCode .= $cFUnctionName."($cFUnctionInputParamsStr);";                 
+                $cFunctionCallCode .=  "\n}%\n";
+                $expectedZephirCode = 'call_c_function('.$firstComp.', '.$secondComp.', '.implode(", ",$cFunctionCallComps).');';
               } else {
+                $cFunctionCallCode .= "let $resultVarName = null;\n"; //initialize result var
+                $cFunctionCallCode .= "\n%{\n";
                 $cFunctionCallCode .= "$resultVarName = ".$cFUnctionName."($cFUnctionInputParamsStr);";
+                $cFunctionCallCode .=  "\n}%\n";
+                $expectedZephirCode = 'let '.$resultVarName.' =  call_c_function('.$firstComp.', '.$secondComp.', '.implode(", ",$cFunctionCallComps).');';
               }
-              $cFunctionCallCode .=  "\n}%\n";
 
-              $expectedZephirCode = 'let '.$resultVarName.' =  call_c_function('.$firstComp.', '.$secondComp.', '.implode(", ",$cFunctionCallComps).');';
               $this->postSearchAndReplace($expectedZephirCode,$cFunctionCallCode);
 
               //now, inject the c source code to the top of the class 
