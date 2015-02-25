@@ -53,13 +53,21 @@ class CFuntionCallConverter extends \PHPtoCExt\Converter
                 $cFunctionCallCode .= "\n%{\n";
                 $cFunctionCallCode .= $cFUnctionName."($cFUnctionInputParamsStr);";                 
                 $cFunctionCallCode .=  "\n}%\n";
-                $expectedZephirCode = 'call_c_function('.$firstComp.', '.$secondComp.', '.implode(", ",$cFunctionCallComps).');';
+                if (strlen($cFUnctionInputParamsStr) == 0) { 
+                  $expectedZephirCode = 'call_c_function('.$firstComp.', '.$secondComp.');';
+                } else {
+                  $expectedZephirCode = 'call_c_function('.$firstComp.', '.$secondComp.', '.implode(", ",$cFunctionCallComps).');';
+                }
               } else {
                 $cFunctionCallCode .= "let $resultVarName = null;\n"; //initialize result var
                 $cFunctionCallCode .= "\n%{\n";
                 $cFunctionCallCode .= "$resultVarName = ".$cFUnctionName."($cFUnctionInputParamsStr);";
                 $cFunctionCallCode .=  "\n}%\n";
-                $expectedZephirCode = 'let '.$resultVarName.' =  call_c_function('.$firstComp.', '.$secondComp.', '.implode(", ",$cFunctionCallComps).');';
+                if (strlen($cFUnctionInputParamsStr) == 0) {
+                  $expectedZephirCode = 'let '.$resultVarName.' =  call_c_function('.$firstComp.', '.$secondComp.');';
+                } else {
+                  $expectedZephirCode = 'let '.$resultVarName.' =  call_c_function('.$firstComp.', '.$secondComp.', '.implode(", ",$cFunctionCallComps).');';
+                }
               }
 
               $this->postSearchAndReplace($expectedZephirCode,$cFunctionCallCode);
