@@ -59,10 +59,14 @@ class CFuntionCallConverter extends \PHPtoCExt\Converter
                   $expectedZephirCode = 'call_c_function('.$firstComp.', '.$secondComp.', '.implode(", ",$cFunctionCallComps).');';
                 }
               } else {
+                //use a tmp var to hold the c_function_call result 
+                $cFunctionCallCode .= "var tmpCFuncCallResult;\n";
+                $cFunctionCallCode .= "let tmpCFuncCallResult = null;\n";
                 $cFunctionCallCode .= "let $resultVarName = null;\n"; //initialize result var
                 $cFunctionCallCode .= "\n%{\n";
-                $cFunctionCallCode .= "$resultVarName = ".$cFUnctionName."($cFUnctionInputParamsStr);";
+                $cFunctionCallCode .= "tmpCFuncCallResult = ".$cFUnctionName."($cFUnctionInputParamsStr);\n";
                 $cFunctionCallCode .=  "\n}%\n";
+                $cFunctionCallCode .= "let $resultVarName = tmpCFuncCallResult;\n";
                 if (strlen($cFUnctionInputParamsStr) == 0) {
                   $expectedZephirCode = 'let '.$resultVarName.' =  call_c_function('.$firstComp.', '.$secondComp.');';
                 } else {
