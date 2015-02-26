@@ -42,6 +42,7 @@ $ php [path/to/php-to-c-extension]/build_extensions.php [directory containing ph
 + [Late static binding](#example-11)
 + [Performance Benchmark: Bubble Sort](#example-12)
 + [Gain greater speed through raw C code, using call_c_function](#example-13)
++ [Using PHP Code together with raw C code to solve problems, using call_c_function](#example-14)
 
 ###Example 01
 
@@ -652,3 +653,90 @@ $ php -c php.ini test.php
 ####We will see the following printed on the screen 
 ####Time spent on sorting: 0.14397192001343 seconds.
 ####The result is really great. Compared to 3.9628620147705 seconds in example 12 and 16.802139997482 seconds for the pure PHP version, it is significantly faster.
+
+###Example 14 
+####In this example below, we will be using PHP code together with raw C code to get the first 800 digits of PI.
+####The algorithm to compute PI is borrowed from https://crypto.stanford.edu/pbc/notes/pi/code.html 
+####First, we will be creating the src/dumm.php and it looks like this:
+```php 
+<?php 
+namespace Dummy;
+
+class Math
+{
+  public function getPI()
+  {
+    $result = call_c_function("math.c","get_pi"); 
+    //convert to format like: 3.1415...
+    $resultSplits = str_split($result);
+    $firstNumber = array_shift($resultSplits);
+    $result = $firstNumber.".".implode("",$resultSplits);
+    return $result;
+  }
+}
+```
+#####Then we will be creating src/math.c and it looks like this:
+```php 
+static zval * get_pi() 
+{
+  zval *result;
+  MAKE_STD_ZVAL(result);
+
+  int r[2800 + 1];
+  int i, k;
+  int b, d;
+  int c = 0;
+  char buf[801];
+  char tmp_buf[4];
+
+  for (i = 0; i < 2800; i++) {
+    r[i] = 2000;
+  }
+
+  int count = 0;
+  for (k = 2800; k > 0; k -= 14) {
+    d = 0;
+
+    i = k;
+    for (;;) {
+      d += r[i] * 10000;
+      b = 2 * i - 1;
+
+      r[i] = d % b;
+      d /= b;
+      i--;
+      if (i == 0) break;
+      d *= i;
+    }
+
+    sprintf(tmp_buf, "%.4d", c + d / 10000);
+
+    buf[count] = tmp_buf[0];
+    buf[count+1] = tmp_buf[1];
+    buf[count+2] = tmp_buf[2];
+    buf[count+3] = tmp_buf[3];
+
+    c = d % 10000;
+
+    count += 4;
+  }
+
+  buf[count+1] = '\0';
+
+  ZVAL_STRING(result, buf, 1);
+
+  return result;
+}
+```
+####Then we will have test.php 
+```php 
+<?php 
+$math = new Dummy\Math();
+print $math->getPI();
+```
+####Then once dummy.so is built and we do:
+```sh
+$ php -c php.ini test.php 
+```
+####We will be seeing the first 800 digits of PI printed on the screen.
+
