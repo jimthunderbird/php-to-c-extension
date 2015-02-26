@@ -24,14 +24,15 @@ class CFuntionCallConverter extends \PHPtoCExt\Converter
         for ($index = $methodInfo->startLine; $index <= $methodInfo->endLine; $index++) {
           if (preg_match("/call_c_function\(.*\)/", $this->codeLines[$index], $matches)) {
 
-            //we simply add $tmpCFuncCallResult = null;\n at the beginning of the method 
-            if (!$tmpCFuncCallResultDefined) {
-              $this->codeLine[$index] = "\$tmpCFuncCallResult = null\n".$this->codeLines[$index];
-              $tmpCFuncCallResultDefined = true;
-            } 
-
             if(count($matches) == 1) {
-              $codeLine = str_replace(array("call_c_function","(",")",";","$"),"",trim($this->codeLines[$index]));
+              //we simply add $tmpCFuncCallResult = null;\n at the beginning of the method 
+              $codeLine = $this->codeLines[$index]; //store the original code line here
+              if (!$tmpCFuncCallResultDefined) {
+                $this->codeLines[$index] = "\$tmpCFuncCallResult = null;\n".$this->codeLines[$index];
+                $tmpCFuncCallResultDefined = true;
+              } 
+
+              $codeLine = str_replace(array("call_c_function","(",")",";","$"),"",trim($codeLine));
               $lineComps = explode("=",$codeLine);
               $lineCompsCount = count($lineComps);
               $resultVarName = "";
@@ -103,7 +104,7 @@ class CFuntionCallConverter extends \PHPtoCExt\Converter
         }
 
       }
-      
+
       $currentClassCode = implode("\n",array_slice($this->codeLines, $classInfo->startLine - 1, $classInfo->endLine - $classInfo->startLine + 1)); 
       $this->searchAndReplace($originalClassCode, $currentClassCode);
     }
