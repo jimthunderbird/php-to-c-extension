@@ -11,7 +11,7 @@ PHP-TO-C-EXT is built on top of these great things:
 ##Installation
 
 1. Install composer
-2. git clone git@github.com:jimthunderbird/php-to-c-extension.git
+2. git clone https://github.com/jimthunderbird/php-to-c-extension.git
 3. cd php-to-c-extension
 4. composer.phar install
 
