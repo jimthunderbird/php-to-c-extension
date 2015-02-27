@@ -8,7 +8,7 @@ if ($argc == 1) {
 $zephirCommand = __DIR__."/vendor/bin/zephir";
 
 # try to install zephir first 
-shell_exec("yes 2>/dev/null | ".$zephirCommand." install > /dev/null 2>/dev/null");
+system("yes 2>/dev/null | ".$zephirCommand." install > /dev/null 2>/dev/null");
 
 require_once __DIR__.'/vendor/autoload.php';
 
@@ -19,11 +19,11 @@ $curDir = getcwd();
 $buildDir = $curDir."/build";
 
 //remove the old build dir, if there is one 
-shell_exec("rm -rf $buildDir/");
+system("rm -rf $buildDir/");
 
 $zephirDir = $buildDir."/zephir";
 
-shell_exec("mkdir -p $zephirDir");
+system("mkdir -p $zephirDir");
 
 $extensionNames = [];
 
@@ -68,9 +68,9 @@ try {
     $classCode = $analyser->getCodeInClass($class);
     $zephirNamespace = strtolower($analyser->getRootNamespaceOfClass($class));
     if (chdir($zephirDir)) {
-      shell_exec("$zephirCommand init $zephirNamespace");
+      system("$zephirCommand init $zephirNamespace");
       $classFileDir = strtolower(str_replace("\\","/",$analyser->getNamespaceOfClass($class)));
-      shell_exec("mkdir -p ".$zephirNamespace."/".$classFileDir);
+      system("mkdir -p ".$zephirNamespace."/".$classFileDir);
       if (!is_readable($zephirNamespace."/".$classFileDir)) {
         throw new PHPtoCExt\PHPtoCExtException("Fail to create directory ".$classFileDir);
       }
@@ -89,7 +89,7 @@ try {
 foreach($extensionNames as $extensionName) {
   $zephirProjectDir = $zephirDir."/".$extensionName;
   if (chdir($zephirProjectDir) ) {
-    echo shell_exec(__DIR__."/vendor/bin/php-to-zephir phpToZephir:convertDir .");
+    system(__DIR__."/vendor/bin/php-to-zephir phpToZephir:convertDir .");
 
     //now do post convertion searches and replaces
     echo "Performing post conversion processing...\n";
@@ -104,7 +104,7 @@ foreach($extensionNames as $extensionName) {
 
     echo "Building extension...\n";
 
-    echo shell_exec("$zephirCommand install");
+    system("$zephirCommand install");
 
   }
 }
