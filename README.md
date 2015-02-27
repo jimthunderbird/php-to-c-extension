@@ -573,7 +573,7 @@ $result = call_c_function("sorting.c","test_bubble_sort",$arr);
 ```
 ####This means we will be calling the test_bubble_sort function inside of sorting.c file, and the test_bubble_sort function takes $arr as the input parameter. And the result of the test_bubble_sort function call will be stored in the $result variable.
 ####Now let's create src/sorting.c file:
-```sh 
+```php
 static zval * test_bubble_sort(zval * arr)
 {
   HashTable *arr_hash = arr->value.ht;
@@ -657,7 +657,7 @@ $ php -c php.ini test.php
 ###Example 14 
 ####In this example below, we will be using PHP code together with raw C code to get the first 800 digits of PI.
 ####The algorithm to compute PI is borrowed from https://crypto.stanford.edu/pbc/notes/pi/code.html 
-####First, we will be creating the src/dumm.php and it looks like this:
+####First, we will be creating the src/dummy.php and it looks like this:
 ```php 
 <?php 
 namespace Dummy;
