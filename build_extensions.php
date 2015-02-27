@@ -5,8 +5,10 @@ if ($argc == 1) {
   die($prompt);
 }
 
+$zephirCommand = __DIR__."/vendor/bin/zephir";
+
 # try to install zephir first 
-shell_exec("yes 2>/dev/null | ".__DIR__."/vendor/bin/zephir install > /dev/null 2>/dev/null");
+shell_exec("yes 2>/dev/null | ".$zephirCommand." install > /dev/null 2>/dev/null");
 
 require_once __DIR__.'/vendor/autoload.php';
 
@@ -66,7 +68,7 @@ try {
     $classCode = $analyser->getCodeInClass($class);
     $zephirNamespace = strtolower($analyser->getRootNamespaceOfClass($class));
     if (chdir($zephirDir)) {
-      shell_exec("zephir init $zephirNamespace");
+      shell_exec("$zephirCommand init $zephirNamespace");
       $classFileDir = strtolower(str_replace("\\","/",$analyser->getNamespaceOfClass($class)));
       shell_exec("mkdir -p ".$zephirNamespace."/".$classFileDir);
       if (!is_readable($zephirNamespace."/".$classFileDir)) {
@@ -102,7 +104,7 @@ foreach($extensionNames as $extensionName) {
 
     echo "Building extension...\n";
 
-    echo shell_exec(__DIR__."/vendor/bin/zephir build");
+    echo shell_exec("$zephirCommand install");
 
   }
 }
