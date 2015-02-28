@@ -7,8 +7,23 @@ if ($argc == 1) {
 
 $zephirCommand = __DIR__."/vendor/bin/zephir";
 
-# try to install zephir first 
-system("yes 2>/dev/null | ".$zephirCommand." install > /dev/null 2>/dev/null");
+$curDir = getcwd();
+
+$jsoncDirContent = trim(shell_exec("find ".__DIR__."/vendor/phalcon/zephir/json-c -type f"));
+
+if (strlen($jsoncDirContent) == 0) { //that means zephir is not installed 
+  if (chdir(__DIR__."/vendor/phalcon/zephir")) {
+    print "Installing zephir...\n";
+    system("./install-json");
+    system("./install"); 
+  } else {
+    die("Error changing to zephir vendor directory!\n");
+  }
+
+  if (!chdir($curDir)) {
+    die("Error changing to current directory!\n");
+  }
+}
 
 require_once __DIR__.'/vendor/autoload.php';
 
