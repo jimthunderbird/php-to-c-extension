@@ -53,7 +53,10 @@ class CFuntionCallConverter extends \PHPtoCExt\Converter
                 $firstComp = array_shift($cFunctionCallComps);
                 $cSourceFile = str_replace(array("'",'"'),"",$firstComp);
                 $secondComp = array_shift($cFunctionCallComps);
+                //get the called c function name 
                 $cFUnctionName = str_replace(array("'",'"'),"",$secondComp);
+                //prepend c file name on each called c function 
+                $cFUnctionName = explode(".",$cSourceFile)[0]."_".$cFUnctionName;
                 $cFUnctionInputParamsStr = "";
                 if (count($cFunctionCallComps) > 0) {
                   $cFUnctionInputParamsStr = implode(", ",$cFunctionCallComps); 
@@ -91,7 +94,14 @@ class CFuntionCallConverter extends \PHPtoCExt\Converter
                 //make sure we only have one unique copy of c source file per class
                 $classNameCSourceFileKey = $className.".".$cSourceFile;
                 if (!isset($cSourceCodeMap[$classNameCSourceFileKey])) {
+                  //read the c source file content
                   $cSourceCode = file_get_contents($this->inputDir."/".$cSourceFile);
+                  //prepend file name on each defined c functions
+                  $cSourceCode = preg_replace_callback("|[a-zA-Z0-9_]+\(.*\)([\s]*){|",function($matches) use (&$cSourceFile) {
+                    if (count($matches) > 0 && strlen($matches[0]) > 0) {
+                      return explode(".",$cSourceFile)[0]."_".$matches[0];
+                    }
+                  },$cSourceCode);
                   $cSourceCodeMap[$classNameCSourceFileKey] = $cSourceCode;
                   $withCSourceCode = "%{\n".$cSourceCodeMap[$classNameCSourceFileKey]."\n}%\n".$originalCode; 
                   $this->postSearchAndReplace($originalCode, $withCSourceCode);
