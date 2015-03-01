@@ -97,9 +97,15 @@ class CFuntionCallConverter extends \PHPtoCExt\Converter
                   //read the c source file content
                   $cSourceCode = file_get_contents($this->inputDir."/".$cSourceFile);
                   //prepend file name on each defined c functions
-                  $cSourceCode = preg_replace_callback("|[a-zA-Z0-9_]+\(.*\)([\s]*){|",function($matches) use (&$cSourceFile) {
+                  $cSourceCode = preg_replace_callback("|[a-zA-Z0-9_]+[\s]*\(.*\)([\s]*){|",function($matches) use (&$cSourceFile) {
                     if (count($matches) > 0 && strlen($matches[0]) > 0) {
-                      return explode(".",$cSourceFile)[0]."_".$matches[0];
+                      //tricky, need to make sure it is not if, for and while 
+                      $functionName = trim(substr($matches[0], 0, strpos($matches[0],"(")));
+                      if ( $functionName !== "for" && $functionName !== "while" && $functionName!== "if" ) {
+                        return explode(".",$cSourceFile)[0]."_".$matches[0];
+                      } else {
+                        return $matches[0];
+                      }
                     }
                   },$cSourceCode);
                   $cSourceCodeMap[$classNameCSourceFileKey] = $cSourceCode;
