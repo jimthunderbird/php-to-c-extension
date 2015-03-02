@@ -47,8 +47,9 @@ class FileFilter
         "\PHPtoCExt\Converter\ClassHierarchyFlatterningConverter",
         "\PHPtoCExt\Converter\StaticVarAutoDefineConverter",
         "\PHPtoCExt\Converter\SelfStaticConverter",
-        "\PHPtoCExt\Converter\CodeReformatConverter", //reformat the code and get ready for the final conversion
-        "\PHPtoCExt\Converter\CFuntionCallConverter", //convert c function calls
+        "\PHPtoCExt\Converter\CodeReformatConverter", //reformat the code and get ready for the final conversion 
+        "\PHPtoCExt\Converter\CFunctionAutoConverter", //convert c_function_auto to c_function_call
+        "\PHPtoCExt\Converter\CFunctionCallConverter", //convert c function calls
       );
 
       $searches = array();

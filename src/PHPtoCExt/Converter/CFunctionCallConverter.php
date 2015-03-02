@@ -6,13 +6,11 @@
  */
 namespace PHPtoCExt\Converter;
 
-class CFuntionCallConverter extends \PHPtoCExt\Converter
+class CFunctionCallConverter extends \PHPtoCExt\Converter
 {
   public function convert()
   {
     //first, find out all call_c_function calls and find out the corresponding class context this c function call belongs to
-    $cFunctionCallIndexes = array();
-
     $classMap = $this->getClassMap();
 
     $cSourceCodeMap = array();
