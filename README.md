@@ -602,6 +602,7 @@ static zval * bubble_sort(zval * arr)
   }
 
   zval *result;
+  MAKE_STD_ZVAL(result);
   array_init(result);
 
   for (i=0; i < arr_length; i++) {
