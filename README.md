@@ -561,7 +561,7 @@ class Sorter
 {
   public function bubbleSort($arr)
   {
-    $result = call_c_function("sorting.c","test_bubble_sort",$arr);
+    $result = call_c_function("sorting.c","bubble_sort",$arr);
 
     return $result;
   }
@@ -569,9 +569,9 @@ class Sorter
 ```
 ####It is pretty straightforward at this point, we have a Sorter class and inside we have the bubbleSort method, it takes an array $arr and it will return the sorted array. Inside the method, we have this code:
 ```php 
-$result = call_c_function("sorting.c","test_bubble_sort",$arr);
+$result = call_c_function("sorting.c","bubble_sort",$arr);
 ```
-####This means we will be calling the test_bubble_sort function inside of sorting.c file, and the test_bubble_sort function takes $arr as the input parameter. And the result of the test_bubble_sort function call will be stored in the $result variable.
+####This means we will be calling the bubble_sort function inside of sorting.c file, and the bubble_sort function takes $arr as the input parameter. And the result of the bubble_sort function call will be stored in the $result variable.
 ####Now let's create src/sorting.c file:
 ```php
 static zval * bubble_sort(zval * arr)
@@ -612,7 +612,7 @@ static zval * bubble_sort(zval * arr)
   return result; 
 }
 ``` 
-####To understand what's going on in the test_bubble_sort C function, it requires some knowledge of the internal Zend Engine's data structure.
+####To understand what's going on in the bubble_sort C function, it requires some knowledge of the internal Zend Engine's data structure.
 ####In the function we will accept a poiner to a zval, which is pointing to the array we pass from PHP. Then we create a pointer to the array's hashtable.
 ####We then create an array of long integers, holding each long integer value in the arBuckets of the array's hashtable.
 ####Later on we perform the standard bubble sort on the long integer array, and finally use the zend array_init add_index_long apis to create a new sorted array and return the result back. 
