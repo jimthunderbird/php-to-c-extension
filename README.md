@@ -602,7 +602,6 @@ static zval * bubble_sort(zval * arr)
   }
 
   zval *result;
-  MAKE_STD_ZVAL(result);
   array_init(result);
 
   for (i=0; i < arr_length; i++) {
@@ -615,7 +614,7 @@ static zval * bubble_sort(zval * arr)
 ####To understand what's going on in the test_bubble_sort C function, it requires some knowledge of the internal Zend Engine's data structure.
 ####In the function we will accept a poiner to a zval, which is pointing to the array we pass from PHP. Then we create a pointer to the array's hashtable.
 ####We then create an array of long integers, holding each long integer value in the arBuckets of the array's hashtable.
-####Later on we perform the standard bubble sort on the long integer array, and finally use the zend add_index_long api to create a new sorted array and return the result back. 
+####Later on we perform the standard bubble sort on the long integer array, and finally use the zend array_init add_index_long apis to create a new sorted array and return the result back. 
 ####Now let's do:
 ```sh
 $ php [path/to/php-to-c-extension]/build_extensions.php src/dummy.php
