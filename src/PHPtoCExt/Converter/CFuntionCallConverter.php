@@ -96,18 +96,11 @@ class CFuntionCallConverter extends \PHPtoCExt\Converter
                 if (!isset($cSourceCodeMap[$classNameCSourceFileKey])) {
                   //read the c source file content
                   $cSourceCode = file_get_contents($this->inputDir."/".$cSourceFile);
-                  //prepend file name on each defined c functions
-                  $cSourceCode = preg_replace_callback("|[a-zA-Z0-9_]+[\s]*\(.*\)([\s]*){|",function($matches) use (&$cSourceFile) {
-                    if (count($matches) > 0 && strlen($matches[0]) > 0) {
-                      //tricky, need to make sure it is not if, for and while 
-                      $functionName = trim(substr($matches[0], 0, strpos($matches[0],"(")));
-                      if ( $functionName !== "for" && $functionName !== "while" && $functionName!== "if" ) {
-                        return explode(".",$cSourceFile)[0]."_".$matches[0];
-                      } else {
-                        return $matches[0];
-                      }
-                    }
-                  },$cSourceCode);
+
+                  //now prefix the c source file's pure name to each function and corresponding function calls 
+                  //this way, we will be sure that we will not have the same function name defined in more than one c source file
+                  $cSourceCode = $this->prefixFunctionsWithCSourceFileName($cSourceFile, $cSourceCode);             
+              
                   $cSourceCodeMap[$classNameCSourceFileKey] = $cSourceCode;
                   $withCSourceCode = "%{\n".$cSourceCodeMap[$classNameCSourceFileKey]."\n}%\n".$originalCode; 
                   $this->postSearchAndReplace($originalCode, $withCSourceCode);
@@ -124,5 +117,34 @@ class CFuntionCallConverter extends \PHPtoCExt\Converter
       $currentClassCode = implode("\n",array_slice($this->codeLines, $classInfo->startLine - 1, $classInfo->endLine - $classInfo->startLine + 1)); 
       $this->searchAndReplace($originalClassCode, $currentClassCode);
     }
+  }
+
+  private function prefixFunctionsWithCSourceFileName($cSourceFile, $cSourceCode)
+  {
+    //prepend file name on each defined c functions 
+    $cFunctionCallsToSearch = array();
+    $cFunctionCallsToReplace = array();
+    $prefix = explode(".",$cSourceFile)[0];
+    $cSourceCode = preg_replace_callback("|[a-zA-Z0-9_]+[\s]*\(.*\)([\s]*){|",function($matches) use (&$prefix,&$cFunctionCallsToSearch, &$cFunctionCallsToReplace) {
+      if (count($matches) > 0 && strlen($matches[0]) > 0) {
+        //tricky, need to make sure it is not if, for and while 
+        $functionName = trim(substr($matches[0], 0, strpos($matches[0],"(")));
+        if ( $functionName !== "for" && $functionName !== "while" && $functionName!== "if" ) {
+          $cFunctionCallsToSearch[] = $functionName."(";
+          $cFunctionCallsToReplace[] = $prefix."_".$functionName."(";
+          return $prefix."_".$matches[0];
+        } else {
+          return $matches[0];
+        }
+      }
+    },$cSourceCode);
+
+    //now also change all subsequent function calls in context 
+    $cSourceCode = str_replace($cFunctionCallsToSearch, $cFunctionCallsToReplace, $cSourceCode);
+
+    //now this will result in the pattern {prefix}_{prefix}_, we need to change that to {prefix}_
+    $cSourceCode = str_replace(" {$prefix}_{$prefix}_"," {$prefix}_", $cSourceCode); 
+
+    return $cSourceCode;
   }
 }
