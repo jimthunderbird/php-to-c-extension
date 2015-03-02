@@ -54,7 +54,9 @@ class CFunctionCallConverter extends \PHPtoCExt\Converter
                 //get the called c function name 
                 $cFUnctionName = str_replace(array("'",'"'),"",$secondComp);
                 //prepend c file name on each called c function 
-                $cFUnctionName = explode(".",$cSourceFile)[0]."_".$cFUnctionName;
+                //we need to consider that the c file name might have / in it, and we need to change that to _ 
+                $cSourceFilePureName = str_replace("/","_",$cSourceFile);
+                $cFUnctionName = explode(".",$cSourceFilePureName)[0]."_".$cFUnctionName;
                 $cFUnctionInputParamsStr = "";
                 if (count($cFunctionCallComps) > 0) {
                   $cFUnctionInputParamsStr = implode(", ",$cFunctionCallComps); 
@@ -122,7 +124,8 @@ class CFunctionCallConverter extends \PHPtoCExt\Converter
     //prepend file name on each defined c functions 
     $cFunctionCallsToSearch = array();
     $cFunctionCallsToReplace = array();
-    $prefix = explode(".",$cSourceFile)[0];
+    //we need to consider that cSourceFile might have / in it, in that case we need to change / to _
+    $prefix = explode(".",str_replace("/","_",$cSourceFile))[0];
     $cSourceCode = preg_replace_callback("|[a-zA-Z0-9_]+[\s]*\(.*\)([\s]*){|",function($matches) use (&$prefix,&$cFunctionCallsToSearch, &$cFunctionCallsToReplace) {
       if (count($matches) > 0 && strlen($matches[0]) > 0) {
         //tricky, need to make sure it is not if, for and while 
