@@ -124,32 +124,22 @@ class FileFilter
 
   /**
    * remove all comments in php code 
-   * credit: http://stackoverflow.com/questions/503871/best-way-to-automatically-remove-comments-from-php-code  
    */
   private function removeAllComments($content)
   {
-    $result = '';
+    //first remove all multiline comments
+    $content = preg_replace('!/\*.*?\*/!s', '', $content);
+    $content = preg_replace('/\n\s*\n/', "\n", $content);
 
-    $commentTokens = array(T_COMMENT);
-
-    if (defined('T_DOC_COMMENT'))
-      $commentTokens[] = T_DOC_COMMENT; // PHP 5
-    if (defined('T_ML_COMMENT'))
-      $commentTokens[] = T_ML_COMMENT;  // PHP 4
-
-    $tokens = token_get_all($content);
-
-    foreach ($tokens as $token) {    
-      if (is_array($token)) {
-        if (in_array($token[0], $commentTokens))
-          continue;
-
-        $token = $token[1];
-      }
-
-      $result .= $token;
+    //now it is time to remove all single line comments
+    $lines = explode("\n",$content);
+    foreach($lines as $index => $line) {
+      $line = preg_replace('~#[^\r\n]*~','',$line);
+      $line = preg_replace('~//[^\r\n]*~','',$line);
+      $line = preg_replace('~/\*.*?\*/~s','',$line);
+      $lines[$index] = $line;
     }
-
+    $result = implode("\n",$lines);
     return $result;
   }
 
