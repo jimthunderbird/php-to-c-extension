@@ -34,7 +34,8 @@ $curDir = getcwd();
 $buildDir = $curDir."/build";
 
 //remove the old build dir, if there is one 
-system("rm -rf $buildDir/");
+//update: we actually do not need to remove the build dir, this way we can build the extension faster
+//system("rm -rf $buildDir/");
 
 $zephirDir = $buildDir."/zephir";
 
@@ -104,7 +105,7 @@ try {
 foreach($extensionNames as $extensionName) {
   $zephirProjectDir = $zephirDir."/".$extensionName;
   if (chdir($zephirProjectDir) ) {
-    system(__DIR__."/vendor/bin/php-to-zephir phpToZephir:convertDir .");
+    system(__DIR__."/vendor/bin/php-to-zephir phpToZephir:convertDir $extensionName");
 
     //now do post convertion searches and replaces
     echo "Performing post conversion processing...\n";
@@ -118,7 +119,6 @@ foreach($extensionNames as $extensionName) {
     echo "Finished post conversion processing\n";
 
     echo "Building extension...\n";
-
     system("$zephirCommand install");
 
   }
