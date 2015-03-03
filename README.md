@@ -43,6 +43,7 @@ $ php [path/to/php-to-c-extension]/build_extensions.php [directory containing ph
 + [Performance Benchmark: Bubble Sort](#example-12)
 + [Gain greater speed through raw C code, using call_c_function](#example-13)
 + [Using PHP Code together with raw C code to solve problems, using call_c_function](#example-14)
++ [Better code structure and saving development time when working with raw C code, using call_c_auto](#example-15)
 
 ###Example 01
 
@@ -743,3 +744,95 @@ $ php -c php.ini test.php
 ```
 ####We will be seeing the first 800 digits of PI printed on the screen.
 
+###Example 15
+####In example 13 and 14 above, we demonstrate the ability to work with PHP and raw C code to solve problems.
+####One thing that came up is, if we are developing on a large extension codebase, using call_c_function and specifying the C source file name and C function name is a bit time consuming and at some points might become tedious. This is when the API call_c_auto comes into help.
+####Below we will demonstrate using call_c_auto to do bubble sort.
+####Let's first create file src/Dummy/Sorter.php:
+```php 
+<?php 
+namespace Dummy;
+
+class Sorter
+{
+  public function bubbleSort($arr)
+  {
+    $result = null;
+    if (count($arr) > 0) {
+      $result = call_c_auto($arr);
+    }
+    return $result;
+  }
+}
+```
+####Notice this line here:
+```php 
+$result = call_c_auto($arr);
+```
+####What we are doing is to pass the $arr input param to the call_c_auto API. Under the hook the extension building process will convert this API to:
+```php 
+$result = call_c_function("Sorter.c","bubbleSort",$arr);
+```
+####See the Sorter.c has the same name as the class name Sorter, and the C function we will be calling has the same name as the PHP method name bubbleSort.
+####This convention helps us organize the code better and save some typing.
+####Now let's create src/Dummy/Sorter.c
+```php 
+static zval * bubbleSort(zval * arr)
+{
+  HashTable *arr_hash = arr->value.ht;
+  long arr_length = arr_hash->nNumOfElements;
+  long i,j;
+
+  zval **p;
+
+  long sorting_arr[arr_length];
+  long tmp;
+
+  for (i=0; i < arr_length; i++) {
+    p = (zval **)(arr_hash->arBuckets[i]->pData);
+    sorting_arr[i] = (*p)->value.lval;
+  } 
+
+  //perform bubble sort
+  for (i=0; i< arr_length; i++) {
+    for (j=0; j<arr_length-1-i; j++) {
+      if (sorting_arr[j+1] < sorting_arr[j]) {
+        tmp = sorting_arr[j];
+        sorting_arr[j] = sorting_arr[j+1];
+        sorting_arr[j+1] = tmp;
+      }
+    }
+  }
+
+  zval *result;
+  MAKE_STD_ZVAL(result);
+  array_init(result);
+
+  for (i=0; i < arr_length; i++) {
+    add_index_long(result, i, sorting_arr[i]);
+  }
+
+  return result; 
+}
+```
+####The code is pretty much the same as the one used in example 13, except that the C function name matches the PHP's method name.
+####Now let's create test.php 
+```php 
+<?php 
+$st = new Dummy\Sorter();
+
+$arr = [5,1,3,8,9,10,2,4,12];
+
+$arr = $st->bubbleSort($arr);
+
+print_r($arr);
+```
+####And let's build our extension by doing:
+```sh 
+$ php [path/to/php-to-c-extension]/build_extensions.php src/Dummy 
+```
+####Then once dummy.so is built and we add extension=dummy.so to php.ini, we can run our test code:
+```sh 
+$php -c php.ini test.php
+```
+####And we will see that our array is nicely sorted.
