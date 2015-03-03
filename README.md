@@ -836,3 +836,4 @@ $ php [path/to/php-to-c-extension]/build_extensions.php src/Dummy
 $php -c php.ini test.php
 ```
 ####And we will see that our array is nicely sorted.
+####The advantage of using call_c_auto in this example is, we have src/Dummy/Sorter.php and src/Dummy/Sorter.c and they interact nicely to solve our problem.
