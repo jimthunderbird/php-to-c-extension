@@ -30,7 +30,7 @@ class CFunctionAutoConverter extends \PHPtoCExt\Converter
               if ($lineCompsCount == 1) { //this means we do not have return result variable 
                 $inputParamsStr = trim($lineComps[0]);
                 if (strlen($inputParamsStr) == 0) {
-                  $this->searchAndReplace("call_c_auto();","call_c_function(\"$className.c\",\"$methodPureName\");");
+                  $this->searchAndReplace($filteredCodeLine."call_c_auto();","call_c_function(\"$className.c\",\"$methodPureName\");");
                 } else {
                   $this->searchAndReplace($codeLine,"call_c_function(\"$className.c\",\"$methodPureName\",$inputParamsStr);");
                 }
