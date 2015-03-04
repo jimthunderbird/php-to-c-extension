@@ -1,6 +1,6 @@
 {
   "name": "jimthunderbird/php-to-c-extension",
-  "description": "A command line tool to convert php classes to c based php extensions",
+  "description": "A command line tool to build Zend Based PHP extensions using PHP and C",
   "keywords": ["tool", "zephir", "extension", "builder"],
   "homepage": "https://github.com/jimthunderbird/php-to-c-extension",
   "license": "MIT",

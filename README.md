@@ -1,12 +1,12 @@
-PHP-TO-C-Ext is a tool to allow developer to write codes in PHP and convert it directly to php extensions.
-
-With PHP-TO-C-Ext tool, the developer can choose a php file that is not changed quite often and convert it to native php extension, thus speeding up the server response time and lower the resource consumption for each request.
+PHP-TO-C-Ext is a tool to allow developer to build Zend Engine based PHP Extensions using PHP together with C.
 
 PHP-TO-C-EXT is built on top of these great things:
 
 + Zephir (http://zephir-lang.com/)
 + PHP Parser (https://github.com/nikic/PHP-Parser)
 + PHP to Zephir (https://github.com/fezfez/php-to-zephir)
+
+PHP-TO-C-EXT is tested on Fedora Linux 21 and Mac OS Yosemite.
 
 ##Installation
 
