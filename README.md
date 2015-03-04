@@ -6,7 +6,7 @@ PHP-TO-C-EXT is built on top of these great things:
 + PHP Parser (https://github.com/nikic/PHP-Parser)
 + PHP to Zephir (https://github.com/fezfez/php-to-zephir)
 
-PHP-TO-C-EXT is tested on Fedora Linux 21 and Mac OS Yosemite.
+PHP-TO-C-EXT is tested on Fedora Linux 21 and Mac OS Yosemite From PHP 5.4 to 5.6.
 
 ##Installation
 
