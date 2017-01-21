@@ -34,8 +34,7 @@ $curDir = getcwd();
 $buildDir = $curDir."/build";
 
 //remove the old build dir, if there is one 
-//update: we actually do not need to remove the build dir, this way we can build the extension faster
-//system("rm -rf $buildDir/");
+system("rm -rf $buildDir/");
 
 $zephirDir = $buildDir."/zephir";
 
@@ -59,10 +58,21 @@ if (is_file($input)) {
   $files = explode("\n",trim(shell_exec("find $input -type f -name \"*.php\"")));
 
   foreach($files as $f) {
-    $fc = str_replace("<?php","",file_get_contents($f));
+    $fc = file_get_contents($f);
     $fc = trim($fc);
+    //remove php beginning tag 
+    if( substr($fc, 0, 5) === "<?php" ) {
+      $fc = substr($fc, 5, strlen($fc));
+    }
+    //remove php ending tag 
+    if ( substr($fc, -2, 2) === "?>") {
+      $fc = substr($fc, 0, strlen($fc) -2);
+    }
     $fileContent .= $fc."\n\n";
   }
+
+  //trim file content again 
+  $fileContent = trim($fileContent);
 
   $file = $zephirDir."/".array_pop(explode("/",$input)).".php";
 }
